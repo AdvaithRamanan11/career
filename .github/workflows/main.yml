@@ -1,14 +1,24 @@
-name: Annual Data Refresh
+name: Annual Data Refresh & Deploy
 
 on:
   schedule:
     - cron: '0 9 1 11 *'
   workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
 
 jobs:
-  refresh-data:
-    name: Fetch & rebuild with fresh data
+  build-and-deploy:
+    name: Fetch, build & deploy to GitHub Pages
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - name: Checkout repo
@@ -23,6 +33,7 @@ jobs:
         run: npm install
 
       - name: Fetch colleges (College Scorecard API)
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         env:
           COLLEGE_SCORECARD_API_KEY: ${{ secrets.COLLEGE_SCORECARD_API_KEY }}
         run: node scripts/fetch-colleges.js
@@ -30,18 +41,23 @@ jobs:
       - name: Build production bundle
         run: npm run build
 
-      - name: Commit updated colleges.json
+      - name: Commit updated data
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add src/data/colleges.json src/data/colleges.js
+          git add src/data/colleges.json
           git diff --staged --quiet || git commit -m "data: annual College Scorecard refresh $(date +%Y)"
           git push
 
-      - name: Deploy to Netlify
-        env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-        run: |
-          npm install -g netlify-cli
-          netlify deploy --prod --dir=dist
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
