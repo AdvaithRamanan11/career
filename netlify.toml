@@ -1,0 +1,61 @@
+# CareerIQ — Netlify configuration
+# Embeddable financial literacy tool for nonprofits
+
+[build]
+  command   = "npm run build"
+  publish   = "dist"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+# ── Headers ────────────────────────────────────────────────────────────────
+# Applied to every response. Configured to allow embedding from any
+# nonprofit domain via iFrame or JS widget.
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Allow any domain to embed CareerIQ in an iFrame.
+    # Do NOT use SAMEORIGIN — that would block all embedding.
+    X-Frame-Options            = "ALLOWALL"
+
+    # Content Security Policy:
+    # frame-ancestors * allows embedding from any host site.
+    Content-Security-Policy    = "frame-ancestors *; default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'"
+
+    # CORS: allow any origin to load the embed.js script and assets
+    Access-Control-Allow-Origin  = "*"
+    Access-Control-Allow-Methods = "GET, OPTIONS"
+
+    # Referrer: send origin only — protects nonprofit partner privacy
+    Referrer-Policy            = "strict-origin"
+
+    # No caching of HTML (always fresh embed code)
+    # Assets are fingerprinted by Vite and can be cached long-term
+    Cache-Control              = "public, max-age=0, must-revalidate"
+
+# Long-term cache for fingerprinted JS/CSS assets
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# embed.js: short cache so nonprofits get updates within an hour
+[[headers]]
+  for = "/embed.js"
+  [headers.values]
+    Cache-Control              = "public, max-age=3600"
+    Access-Control-Allow-Origin = "*"
+
+# ── Redirects ──────────────────────────────────────────────────────────────
+# SPA fallback — all routes serve index.html (React handles routing)
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
+
+# ── Environment variables ──────────────────────────────────────────────────
+# Set these in the Netlify dashboard, NOT here:
+#   COLLEGE_SCORECARD_API_KEY   — data.ed.gov API key for the build pipeline
+#
+# Never commit API keys to this file.
