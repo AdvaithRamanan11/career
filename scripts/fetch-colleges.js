@@ -145,22 +145,11 @@ async function main() {
 
   console.log(`\n✅  Fetched ${clean.length} colleges`)
 
-  // Write JSON (for git commit history)
+  // Write colleges.json — Vite imports this at build time
   const jsonPath = path.join(__dirname, '../src/data/colleges.json')
   fs.writeFileSync(jsonPath, JSON.stringify(clean, null, 2))
   const kb = Math.round(fs.statSync(jsonPath).size / 1024)
-  console.log(`💾  Written colleges.json (${kb}KB)`)
-
-  // Inject directly into colleges.js so Vite bundles it without a JSON import
-  const jsPath = path.join(__dirname, '../src/data/colleges.js')
-  const existing = fs.readFileSync(jsPath, 'utf8')
-  const marker = 'const COLLEGES_DATA = ['
-  const markerIdx = existing.indexOf(marker)
-  if (markerIdx !== -1) {
-    const before = existing.slice(0, markerIdx)
-    fs.writeFileSync(jsPath, before + `const COLLEGES_DATA = ${JSON.stringify(clean)}\n`)
-    console.log(`✅  Injected ${clean.length} colleges into colleges.js`)
-  }
+  console.log(`💾  Written src/data/colleges.json (${kb}KB, ${clean.length} colleges)`)
 
   if (kb > 500) console.warn(`⚠️  ${kb}KB — consider trimming fields`)
 }
