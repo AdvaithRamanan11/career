@@ -63,9 +63,9 @@ export default function LoanEstimator() {
           {/* Financial Aid */}
           <div className="bg-white rounded-2xl border border-gray-200 p-4">
             <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Financial Aid Estimate (per year)</h3>
-            <DataRow label="Avg. Grant Aid" value={formatCurrency(loan.grantPerYear)} />
-            <DataRow label="Federal Loan Cap (Year 1)" value={formatCurrency(loan.federalLoanCapYear1)} />
-            <DataRow label="Est. Loan Needed / Year" value={formatCurrency(loan.loanNeededPerYear)} highlight />
+            <DataRow label="Net Price (after all grant aid)" value={formatCurrency(loan.netPricePerYear)} />
+            <DataRow label="Federal Loan Cap (Year 1)" value={formatCurrency(loan.federalCapYear1)} />
+            <DataRow label="Est. Loan Needed / Year" value={formatCurrency(loan.netPricePerYear)} highlight />
           </div>
 
           {/* Loan Projection */}
