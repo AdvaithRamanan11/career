@@ -55,6 +55,8 @@ const FIELDS = [
   'latest.cost.net_price.private.by_income_level.48001-75000',
   'latest.cost.net_price.private.by_income_level.75001-110000',
   'latest.cost.net_price.private.by_income_level.110001-plus',
+  // Earnings data for deriving tier multipliers
+  'latest.earnings.10_yrs_after_entry.median',    // median earnings 10yr after entry (all majors)
 ].join(',')
 
 // Filters: four-year, Title IV eligible, currently operating, not purely for-profit
@@ -116,18 +118,19 @@ function normalizeCollege(raw) {
   }
 
   return {
-    id:          String(raw.id),
-    name:        raw['school.name'],
-    city:        raw['school.city'],
-    state:       raw['school.state'],
-    distanceOnly: raw['school.distance_only'] === 1,
-    tier:        inferTier(admRate),
+    id:             String(raw.id),
+    name:           raw['school.name'],
+    city:           raw['school.city'],
+    state:          raw['school.state'],
+    distanceOnly:   raw['school.distance_only'] === 1,
+    tier:           inferTier(admRate),
     ownership,
-    locale:      inferArea(raw['school.locale']),
+    locale:         inferArea(raw['school.locale']),
     tuition,
     roomBoard,
     booksOther,
     netPrice,
+    earningsMedian: raw['latest.earnings.10_yrs_after_entry.median'] ?? null,
   }
 }
 
@@ -157,15 +160,62 @@ async function main() {
   // Sort alphabetically by name
   clean.sort((a, b) => a.name.localeCompare(b.name))
 
-  console.log(`\n✅  Fetched ${clean.length} colleges`)
+  console.log(`\n✅  Fetched ${clean.length} colleges (${clean.filter(c => c.earningsMedian).length} with earnings data)`)
+
+  // ─── Derive tier multipliers from Scorecard earnings data ──────────────────
+  // Group colleges by tier, compute median earnings per tier, then compute
+  // each tier's ratio to the overall median. This replaces hardcoded multipliers.
+  const tierEarnings = { 1: [], 2: [], 3: [], 4: [] }
+  for (const c of clean) {
+    if (c.earningsMedian && c.earningsMedian > 0) {
+      tierEarnings[c.tier]?.push(c.earningsMedian)
+    }
+  }
+
+  function median(arr) {
+    if (!arr.length) return null
+    const sorted = [...arr].sort((a, b) => a - b)
+    const mid = Math.floor(sorted.length / 2)
+    return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2
+  }
+
+  const tierMedians = {
+    1: median(tierEarnings[1]),
+    2: median(tierEarnings[2]),
+    3: median(tierEarnings[3]),
+    4: median(tierEarnings[4]),
+  }
+
+  // Overall median across all tiers (weighted baseline)
+  const allEarnings = Object.values(tierEarnings).flat()
+  const overallMedian = median(allEarnings)
+
+  const tierMultipliers = {}
+  for (const tier of [1, 2, 3, 4]) {
+    if (tierMedians[tier] && overallMedian) {
+      tierMultipliers[tier] = Math.round((tierMedians[tier] / overallMedian) * 1000) / 1000
+    } else {
+      // Fallback if a tier has no earnings data
+      const defaults = { 1: 1.35, 2: 1.18, 3: 1.05, 4: 0.92 }
+      tierMultipliers[tier] = defaults[tier]
+      console.warn(`⚠  Tier ${tier} has no earnings data, using default multiplier ${defaults[tier]}`)
+    }
+  }
+
+  console.log('\n📊  Tier multipliers derived from Scorecard earnings:')
+  for (const tier of [1, 2, 3, 4]) {
+    const labels = { 1: 'Elite', 2: 'Selective', 3: 'Above Average', 4: 'Average' }
+    console.log(`     Tier ${tier} (${labels[tier]}): ${tierMultipliers[tier]}x  (median earnings: $${tierMedians[tier]?.toLocaleString() ?? 'N/A'}, n=${tierEarnings[tier].length})`)
+  }
+
+  // Strip distanceOnly from final output — it was only needed for filtering
+  const output = clean.map(({ distanceOnly, ...rest }) => rest)
 
   // Write colleges.json — Vite imports this at build time
   const jsonPath = path.join(__dirname, '../src/data/colleges.json')
-  fs.writeFileSync(jsonPath, JSON.stringify(clean, null, 2))
+  fs.writeFileSync(jsonPath, JSON.stringify({ _meta: { tierMultipliers, computedAt: new Date().toISOString() }, colleges: output }, null, 2))
   const kb = Math.round(fs.statSync(jsonPath).size / 1024)
-  console.log(`💾  Written src/data/colleges.json (${kb}KB, ${clean.length} colleges)`)
-
-  if (kb > 500) console.warn(`⚠️  ${kb}KB — consider trimming fields`)
+  console.log(`💾  Written src/data/colleges.json (${kb}KB, ${output.length} colleges)`)
 }
 
 main().catch(err => {
