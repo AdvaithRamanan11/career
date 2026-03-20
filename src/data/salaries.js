@@ -11,7 +11,8 @@
  * so no salary figures are hardcoded in this file.
  */
 
-import salariesData from './salaries.json' with { type: 'json' }
+import salariesData       from './salaries.json' with { type: 'json' }
+import { TIER_MULTIPLIERS_FROM_SCORECARD } from './colleges.js'
 
 // Build a lookup map from jobId → blsBase wage
 const wageMap = Object.fromEntries(
@@ -197,25 +198,29 @@ export const MAJORS = [
 ]
 
 // Area multipliers — derived from BLS OES metro vs. national wage ratios.
-// Updated annually via fetch-salaries.js (issue #7).
-export const AREA_MULTIPLIERS = {
+// Computed annually by fetch-salaries.js from actual metro/nonmetro BLS series.
+// Falls back to hardcoded estimates only if BLS metro data is unavailable.
+export const AREA_MULTIPLIERS = salariesData._meta?.areaMultipliers ?? {
   Urban:    1.12,
-  Suburban: 1.0,
+  Suburban: 1.00,
   Rural:    0.84,
 }
 
-// Experience multipliers — wage growth by career stage.
-// Updated annually via fetch-salaries.js (issue #8).
+// Experience multipliers — calibrated so BLS mean wage = Experienced (1.0 baseline).
+// BLS OES mean wage reflects the average worker, which skews toward ~7yrs experience.
+// Entry-level salaries are typically 60-65% of the BLS mean (NACE, Glassdoor, Levels.fyi).
+// Sources: NACE Salary Survey 2024, BLS NCS work-level wage data, Glassdoor Entry vs All.
 export const EXPERIENCE_MULTIPLIERS = {
-  'Entry':        1.0,
-  'Early Career': 1.15,
-  'Experienced':  1.45,
-  'Veteran':      1.85,
+  'Entry':        0.62,  // 0-2 yrs:  ~62% of BLS mean (NACE 2024 starting salary data)
+  'Early Career': 0.78,  // 2-5 yrs:  ~78% of BLS mean
+  'Experienced':  1.00,  // 5-10 yrs: BLS mean wage (this IS the baseline)
+  'Veteran':      1.28,  // 10+ yrs:  ~28% above BLS mean (BLS NCS senior work level)
 }
 
-// School tier salary multipliers — derived from College Scorecard median earnings
-// by institutional selectivity tier. Updated annually via fetch-salaries.js (issue #6).
-export const TIER_MULTIPLIERS = {
+// School tier salary multipliers — derived from College Scorecard median 10yr earnings
+// grouped by institutional selectivity tier. Computed annually by fetch-colleges.js.
+// Falls back to hardcoded estimates only if Scorecard earnings data is unavailable.
+export const TIER_MULTIPLIERS = TIER_MULTIPLIERS_FROM_SCORECARD ?? {
   1: 1.35,
   2: 1.18,
   3: 1.05,
