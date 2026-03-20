@@ -192,15 +192,17 @@ const PROXY_PREMIUMS = {
 // ─── Build BLS Series IDs ────────────────────────────────────────────────────
 // OES national annual mean wage series: OEUM000000{SOC_7digit}08
 function socToSeriesId(soc) {
-  // BLS OES series ID format (exactly 18 characters):
-  //   OE = Occupational Employment survey
-  //   U  = Unadjusted seasonal adjustment
-  //   0000000 = national area code (7 digits)
-  //   151252  = SOC code digits without dash (always 6 digits)
-  //   08      = data type (annual mean wage)
-  // Example: Software Developers 15-1252 → OEU000000015125208
+  // BLS OES series ID — exactly 25 characters:
+  //   OE       = Occupational Employment & Wage Statistics survey (2)
+  //   U        = Unadjusted seasonal code (1)
+  //   N        = National areatype (1)
+  //   0000000  = National area code, 7 digits (7)
+  //   000000   = All industries, 6 digits (6)
+  //   151252   = SOC code digits without dash, always 6 digits (6)
+  //   04       = Datatype 04 = Annual mean wage (2)
+  // Example: Software Developers 15-1252 → OEUN000000000000015125204
   const digits = soc.replace('-', '')   // '15-1252' → '151252' (always 6 chars)
-  return `OEU0000000${digits}08`
+  return `OEUN0000000000000${digits}04`
 }
 
 // Deduplicate — multiple jobs share the same SOC, only fetch each series once
