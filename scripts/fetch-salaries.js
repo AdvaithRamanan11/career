@@ -102,13 +102,13 @@ const JOB_SOC_MAP = [
   { jobId: 'elementary_teacher',     soc: '25-2021', title: 'Elementary School Teachers, Except Special Education' },
   { jobId: 'school_counselor',       soc: '21-1012', title: 'Educational, Guidance, and Career Counselors and Advisors' },
   { jobId: 'special_ed_teacher',     soc: '25-2050', title: 'Special Education Teachers'                      },
-  { jobId: 'college_professor',      soc: '25-1099', title: 'Postsecondary Teachers, All Other'               },
+  { jobId: 'college_professor',      soc: '25-1000', title: 'Postsecondary Teachers, All'                     },  // 25-1099 suppressed by BLS; using broader aggregate
   { jobId: 'curriculum_developer',   soc: '25-9031', title: 'Instructional Coordinators'                      },
   { jobId: 'education_administrator',soc: '11-9032', title: 'Education Administrators, Kindergarten through Secondary' },
   { jobId: 'instructional_designer', soc: '25-9031', title: 'Instructional Coordinators',         proxy: true  },
 
   // ── Social Sciences / Psychology ──────────────────────────────────────────
-  { jobId: 'psychologist',           soc: '19-3031', title: 'Clinical and Counseling Psychologists'           },
+  { jobId: 'psychologist',           soc: '19-3039', title: 'Psychologists, All Other'                        },  // 19-3031 suppressed by BLS; using broader aggregate
   { jobId: 'social_worker',          soc: '21-1022', title: 'Healthcare Social Workers'                       },
   { jobId: 'market_researcher',      soc: '13-1161', title: 'Market Research Analysts and Marketing Specialists' },
   { jobId: 'ux_researcher',          soc: '19-3099', title: 'Social Scientists and Related Workers, All Other', proxy: true },
@@ -274,34 +274,41 @@ async function main() {
   }
 
   // ─── Build salaries.json ───────────────────────────────────────────────────
-  // Map each job to its BLS wage, applying proxy premiums where needed.
-  // Jobs with no BLS data fall back to the prior hardcoded value (from salaries.js).
-  const FALLBACKS = buildFallbacks()
+  // Every job must have live BLS data — no hardcoded fallbacks.
+  // If any SOC returns no data the build fails loudly so it gets fixed immediately.
+  const missingJobs = []
 
   const jobs = JOB_SOC_MAP.map(({ jobId, soc, title, proxy }) => {
-    const blsWage  = wagesBySoc[soc]
-    const premium  = PROXY_PREMIUMS[jobId] ?? 1.0
-    const wage     = blsWage
-      ? Math.round(blsWage * premium)
-      : FALLBACKS[jobId]
+    const blsWage = wagesBySoc[soc]
+    const premium = PROXY_PREMIUMS[jobId] ?? 1.0
 
     if (!blsWage) {
-      console.warn(`   ⚠ ${jobId}: BLS returned no data for ${soc}, using fallback $${FALLBACKS[jobId]?.toLocaleString()}`)
+      missingJobs.push({ jobId, soc })
+      return null
     }
 
     return {
       jobId,
-      blsBase:     wage,
-      socCode:     soc,
-      socTitle:    title,
-      isProxy:     proxy ?? false,
+      blsBase:      Math.round(blsWage * premium),
+      socCode:      soc,
+      socTitle:     title,
+      isProxy:      proxy ?? false,
       proxyPremium: proxy ? premium : undefined,
-      source:      blsWage ? 'BLS OES' : 'fallback',
+      source:       'BLS OES',
     }
   })
 
-  const successful = jobs.filter(j => j.source === 'BLS OES').length
-  console.log(`\n✅  ${successful}/${jobs.length} jobs have live BLS data`)
+  // Hard fail if any job has no BLS data — fixes must be made to SOC codes, not fallbacks
+  if (missingJobs.length > 0) {
+    console.error(`\n❌  ${missingJobs.length} job(s) returned no BLS data:`)
+    for (const { jobId, soc } of missingJobs) {
+      console.error(`     ${jobId} (SOC ${soc}) — check if BLS suppressed this series`)
+      console.error(`     Try a broader aggregate SOC code in JOB_SOC_MAP`)
+    }
+    process.exit(1)
+  }
+
+  console.log(`\n✅  All ${jobs.length} jobs have live BLS data`)
 
   // Write the output
   const out = {
@@ -320,45 +327,7 @@ async function main() {
   console.log(`💾  Written src/data/salaries.json (${kb}KB, ${jobs.length} jobs)`)
 }
 
-// ─── Fallback values (prior hardcoded data) ───────────────────────────────────
-// Used only if BLS API returns no data for a series (rare — usually means the
-// occupation was reclassified or the series ID changed). Update these when
-// manually verifying data each year.
-function buildFallbacks() {
-  return {
-    software_engineer: 130160, data_scientist: 108020, product_manager: 120000,
-    cybersecurity_analyst: 112000, ml_engineer: 142000, devops_engineer: 118000,
-    ux_designer: 85000, it_manager: 159000, financial_analyst: 96220,
-    marketing_manager: 140040, management_consultant: 95290, accountant: 79880,
-    hr_manager: 136350, sales_manager: 130600, operations_manager: 103650,
-    investment_banker: 108000, mechanical_engineer: 96310, electrical_engineer: 101780,
-    civil_engineer: 89940, chemical_engineer: 105550, aerospace_engineer: 122270,
-    biomedical_engineer: 97410, environmental_engineer: 96820, industrial_engineer: 96350,
-    physician: 229300, nurse_practitioner: 121610, pharmacist: 132750,
-    registered_nurse: 81220, physician_assistant: 126010, physical_therapist: 97720,
-    occupational_therapist: 93180, dentist: 163220, corporate_lawyer: 135740,
-    public_defender: 72000, policy_analyst: 76300, government_official: 101750,
-    paralegal: 59200, judge: 136910, lobbyist: 88000, diplomat: 84000,
-    hs_teacher: 62360, elementary_teacher: 61620, school_counselor: 61710,
-    special_ed_teacher: 62420, college_professor: 84380, curriculum_developer: 74620,
-    education_administrator: 100340, instructional_designer: 77510,
-    psychologist: 90590, social_worker: 58380, market_researcher: 68230,
-    ux_researcher: 92000, nonprofit_manager: 66000, community_organizer: 52000,
-    hr_specialist: 67650, recruiter: 63000, journalist: 55960, pr_specialist: 67440,
-    content_strategist: 74000, broadcast_journalist: 57000, advertising_manager: 127830,
-    social_media_manager: 63000, technical_writer: 79960, editor: 75680,
-    graphic_designer: 58910, industrial_designer: 78450, animator: 81020,
-    architect: 93310, interior_designer: 60340, fashion_designer: 78010,
-    art_director: 106500, game_designer: 100080, biologist: 84000, chemist: 80890,
-    physicist: 152430, geoscientist: 87480, environmental_scientist: 76480,
-    biochemist: 100270, epidemiologist: 78830, zoologist: 67480,
-    economist: 115730, investment_analyst: 105000, actuary: 120000,
-    financial_manager: 156100, personal_financial_advisor: 94170,
-    portfolio_manager: 132000, risk_analyst: 98000, tax_specialist: 82000,
-    rn: 81220, icu_nurse: 87000, travel_nurse: 95000, nurse_manager: 104830,
-    crna: 203090, midwife: 120880, clinical_nurse: 109000, nursing_professor: 84000,
-  }
-}
+
 
 main().catch(err => {
   console.error('❌  Fetch failed:', err.message)
