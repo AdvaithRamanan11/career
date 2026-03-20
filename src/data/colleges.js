@@ -6,7 +6,7 @@
  * The fallback list below is only used if colleges.json hasn't been generated yet.
  */
 
-import collegesFromJson from './colleges.json' assert { type: 'json' }
+import collegesFromJson from './colleges.json' with { type: 'json' }
 
 export const COLLEGES = collegesFromJson
 
