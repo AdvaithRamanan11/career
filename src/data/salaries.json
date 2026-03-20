@@ -2,370 +2,370 @@
   "_meta": {
     "source": "BLS Occupational Employment and Wage Statistics (OES)",
     "apiEndpoint": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-    "fetchedAt": "2026-03-20T05:20:41.200Z",
+    "fetchedAt": "2026-03-20T05:25:31.604Z",
     "note": "Annual mean wages. Proxy jobs marked with isProxy=true have a proxyPremium applied."
   },
   "jobs": [
     {
       "jobId": "software_engineer",
-      "blsBase": 130160,
+      "blsBase": 144570,
       "socCode": "15-1252",
       "socTitle": "Software Developers",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "data_scientist",
-      "blsBase": 108020,
+      "blsBase": 124590,
       "socCode": "15-2051",
       "socTitle": "Data Scientists",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "product_manager",
-      "blsBase": 120000,
+      "blsBase": 137706,
       "socCode": "15-1299",
       "socTitle": "Computer Occupations, All Other",
       "isProxy": true,
       "proxyPremium": 1.18,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "cybersecurity_analyst",
-      "blsBase": 112000,
+      "blsBase": 127730,
       "socCode": "15-1212",
       "socTitle": "Information Security Analysts",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "ml_engineer",
-      "blsBase": 142000,
+      "blsBase": 155738,
       "socCode": "15-2051",
       "socTitle": "Data Scientists",
       "isProxy": true,
       "proxyPremium": 1.25,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "devops_engineer",
-      "blsBase": 118000,
+      "blsBase": 109285,
       "socCode": "15-1244",
       "socTitle": "Network and Computer Systems Administrators",
       "isProxy": true,
       "proxyPremium": 1.08,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "ux_designer",
-      "blsBase": 85000,
+      "blsBase": 111450,
       "socCode": "15-1255",
       "socTitle": "Web and Digital Interface Designers",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "it_manager",
-      "blsBase": 159000,
+      "blsBase": 187990,
       "socCode": "11-3021",
       "socTitle": "Computer and Information Systems Managers",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "financial_analyst",
-      "blsBase": 96220,
+      "blsBase": 116490,
       "socCode": "13-2051",
       "socTitle": "Financial and Investment Analysts",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "marketing_manager",
-      "blsBase": 140040,
+      "blsBase": 171520,
       "socCode": "11-2021",
       "socTitle": "Marketing Managers",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "management_consultant",
-      "blsBase": 95290,
+      "blsBase": 114710,
       "socCode": "13-1111",
       "socTitle": "Management Analysts",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "accountant",
-      "blsBase": 79880,
+      "blsBase": 93520,
       "socCode": "13-2011",
       "socTitle": "Accountants and Auditors",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "hr_manager",
-      "blsBase": 136350,
+      "blsBase": 160480,
       "socCode": "11-3121",
       "socTitle": "Human Resources Managers",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "sales_manager",
-      "blsBase": 130600,
+      "blsBase": 160930,
       "socCode": "11-2022",
       "socTitle": "Sales Managers",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "operations_manager",
-      "blsBase": 103650,
+      "blsBase": 133120,
       "socCode": "11-1021",
       "socTitle": "General and Operations Managers",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "investment_banker",
-      "blsBase": 108000,
+      "blsBase": 136141,
       "socCode": "13-2099",
       "socTitle": "Financial Specialists, All Other",
       "isProxy": true,
       "proxyPremium": 1.45,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "mechanical_engineer",
-      "blsBase": 96310,
+      "blsBase": 110080,
       "socCode": "17-2141",
       "socTitle": "Mechanical Engineers",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "electrical_engineer",
-      "blsBase": 101780,
+      "blsBase": 120980,
       "socCode": "17-2071",
       "socTitle": "Electrical Engineers",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "civil_engineer",
-      "blsBase": 89940,
+      "blsBase": 107050,
       "socCode": "17-2051",
       "socTitle": "Civil Engineers",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "chemical_engineer",
-      "blsBase": 105550,
+      "blsBase": 128430,
       "socCode": "17-2041",
       "socTitle": "Chemical Engineers",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "aerospace_engineer",
-      "blsBase": 122270,
+      "blsBase": 141180,
       "socCode": "17-2011",
       "socTitle": "Aerospace Engineers",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "biomedical_engineer",
-      "blsBase": 97410,
+      "blsBase": 115020,
       "socCode": "17-2031",
       "socTitle": "Bioengineers and Biomedical Engineers",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "environmental_engineer",
-      "blsBase": 96820,
+      "blsBase": 110570,
       "socCode": "17-2081",
       "socTitle": "Environmental Engineers",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "industrial_engineer",
-      "blsBase": 96350,
+      "blsBase": 107900,
       "socCode": "17-2112",
       "socTitle": "Industrial Engineers",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "physician",
-      "blsBase": 229300,
+      "blsBase": 262710,
       "socCode": "29-1216",
       "socTitle": "General Internal Medicine Physicians",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "nurse_practitioner",
-      "blsBase": 121610,
+      "blsBase": 132000,
       "socCode": "29-1171",
       "socTitle": "Nurse Practitioners",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "pharmacist",
-      "blsBase": 132750,
+      "blsBase": 137210,
       "socCode": "29-1051",
       "socTitle": "Pharmacists",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "registered_nurse",
-      "blsBase": 81220,
+      "blsBase": 98430,
       "socCode": "29-1141",
       "socTitle": "Registered Nurses",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "physician_assistant",
-      "blsBase": 126010,
+      "blsBase": 136900,
       "socCode": "29-1071",
       "socTitle": "Physician Assistants",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "physical_therapist",
-      "blsBase": 97720,
+      "blsBase": 102400,
       "socCode": "29-1123",
       "socTitle": "Physical Therapists",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "occupational_therapist",
-      "blsBase": 93180,
+      "blsBase": 98240,
       "socCode": "29-1122",
       "socTitle": "Occupational Therapists",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "dentist",
-      "blsBase": 163220,
+      "blsBase": 196100,
       "socCode": "29-1021",
       "socTitle": "Dentists, General",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "corporate_lawyer",
-      "blsBase": 135740,
+      "blsBase": 182760,
       "socCode": "23-1011",
       "socTitle": "Lawyers",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "public_defender",
-      "blsBase": 72000,
+      "blsBase": 100518,
       "socCode": "23-1011",
       "socTitle": "Lawyers",
       "isProxy": true,
       "proxyPremium": 0.55,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "policy_analyst",
-      "blsBase": 76300,
+      "blsBase": 137600,
       "socCode": "19-3094",
       "socTitle": "Political Scientists",
       "isProxy": true,
       "proxyPremium": 1,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "government_official",
-      "blsBase": 101750,
+      "blsBase": 84980,
       "socCode": "13-1041",
       "socTitle": "Compliance Officers",
       "isProxy": true,
       "proxyPremium": 1,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "paralegal",
-      "blsBase": 59200,
+      "blsBase": 66510,
       "socCode": "23-2011",
       "socTitle": "Paralegals and Legal Assistants",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "judge",
-      "blsBase": 136910,
+      "blsBase": 143110,
       "socCode": "23-1023",
       "socTitle": "Judges, Magistrate Judges, and Magistrates",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "lobbyist",
-      "blsBase": 88000,
+      "blsBase": 172374,
       "socCode": "11-9199",
       "socTitle": "Managers, All Other",
       "isProxy": true,
       "proxyPremium": 1.15,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "diplomat",
-      "blsBase": 84000,
+      "blsBase": 149890,
       "socCode": "11-9199",
       "socTitle": "Managers, All Other",
       "isProxy": true,
       "proxyPremium": 1,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "hs_teacher",
-      "blsBase": 62360,
+      "blsBase": 73700,
       "socCode": "25-2031",
       "socTitle": "Secondary School Teachers, Except Special and Career/Technical Education",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "elementary_teacher",
-      "blsBase": 61620,
+      "blsBase": 69790,
       "socCode": "25-2021",
       "socTitle": "Elementary School Teachers, Except Special Education",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "school_counselor",
-      "blsBase": 61710,
+      "blsBase": 71520,
       "socCode": "21-1012",
       "socTitle": "Educational, Guidance, and Career Counselors and Advisors",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "special_ed_teacher",
-      "blsBase": 62420,
+      "blsBase": 72230,
       "socCode": "25-2050",
       "socTitle": "Special Education Teachers",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "college_professor",
@@ -377,28 +377,28 @@
     },
     {
       "jobId": "curriculum_developer",
-      "blsBase": 74620,
+      "blsBase": 77600,
       "socCode": "25-9031",
       "socTitle": "Instructional Coordinators",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "education_administrator",
-      "blsBase": 100340,
+      "blsBase": 113360,
       "socCode": "11-9032",
       "socTitle": "Education Administrators, Kindergarten through Secondary",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "instructional_designer",
-      "blsBase": 77510,
+      "blsBase": 77600,
       "socCode": "25-9031",
       "socTitle": "Instructional Coordinators",
       "isProxy": true,
       "proxyPremium": 1,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "psychologist",
@@ -410,392 +410,392 @@
     },
     {
       "jobId": "social_worker",
-      "blsBase": 58380,
+      "blsBase": 72030,
       "socCode": "21-1022",
       "socTitle": "Healthcare Social Workers",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "market_researcher",
-      "blsBase": 68230,
+      "blsBase": 86480,
       "socCode": "13-1161",
       "socTitle": "Market Research Analysts and Marketing Specialists",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "ux_researcher",
-      "blsBase": 92000,
+      "blsBase": 111762,
       "socCode": "19-3099",
       "socTitle": "Social Scientists and Related Workers, All Other",
       "isProxy": true,
       "proxyPremium": 1.05,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "nonprofit_manager",
-      "blsBase": 66000,
+      "blsBase": 86100,
       "socCode": "11-9151",
       "socTitle": "Social and Community Service Managers",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "community_organizer",
-      "blsBase": 52000,
+      "blsBase": 58360,
       "socCode": "21-1099",
       "socTitle": "Community and Social Service Specialists, All Other",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "hr_specialist",
-      "blsBase": 67650,
+      "blsBase": 79730,
       "socCode": "13-1071",
       "socTitle": "Human Resources Specialists",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "recruiter",
-      "blsBase": 63000,
+      "blsBase": 79730,
       "socCode": "13-1071",
       "socTitle": "Human Resources Specialists",
       "isProxy": true,
       "proxyPremium": 1,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "journalist",
-      "blsBase": 55960,
+      "blsBase": 106030,
       "socCode": "27-3023",
       "socTitle": "News Analysts, Reporters, and Journalists",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "pr_specialist",
-      "blsBase": 67440,
+      "blsBase": 80310,
       "socCode": "27-3031",
       "socTitle": "Public Relations Specialists",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "content_strategist",
-      "blsBase": 74000,
+      "blsBase": 85780,
       "socCode": "27-3043",
       "socTitle": "Writers and Authors",
       "isProxy": true,
       "proxyPremium": 1,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "broadcast_journalist",
-      "blsBase": 57000,
+      "blsBase": 106030,
       "socCode": "27-3023",
       "socTitle": "News Analysts, Reporters, and Journalists",
       "isProxy": true,
       "proxyPremium": 1,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "advertising_manager",
-      "blsBase": 127830,
+      "blsBase": 149270,
       "socCode": "11-2011",
       "socTitle": "Advertising and Promotions Managers",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "social_media_manager",
-      "blsBase": 63000,
+      "blsBase": 145792,
       "socCode": "11-2021",
       "socTitle": "Marketing Managers",
       "isProxy": true,
       "proxyPremium": 0.85,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "technical_writer",
-      "blsBase": 79960,
+      "blsBase": 92330,
       "socCode": "27-3042",
       "socTitle": "Technical Writers",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "editor",
-      "blsBase": 75680,
+      "blsBase": 85700,
       "socCode": "27-3041",
       "socTitle": "Editors",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "graphic_designer",
-      "blsBase": 58910,
+      "blsBase": 68610,
       "socCode": "27-1024",
       "socTitle": "Graphic Designers",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "industrial_designer",
-      "blsBase": 78450,
+      "blsBase": 88000,
       "socCode": "27-1021",
       "socTitle": "Commercial and Industrial Designers",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "animator",
-      "blsBase": 81020,
+      "blsBase": 110110,
       "socCode": "27-1014",
       "socTitle": "Special Effects Artists and Animators",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "architect",
-      "blsBase": 93310,
+      "blsBase": 103390,
       "socCode": "17-1011",
       "socTitle": "Architects, Except Landscape and Naval",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "interior_designer",
-      "blsBase": 60340,
+      "blsBase": 71430,
       "socCode": "27-1025",
       "socTitle": "Interior Designers",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "fashion_designer",
-      "blsBase": 78010,
+      "blsBase": 122430,
       "socCode": "27-1022",
       "socTitle": "Fashion Designers",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "art_director",
-      "blsBase": 106500,
+      "blsBase": 128100,
       "socCode": "27-1011",
       "socTitle": "Art Directors",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "game_designer",
-      "blsBase": 100080,
+      "blsBase": 111450,
       "socCode": "15-1255",
       "socTitle": "Web and Digital Interface Designers",
       "isProxy": true,
       "proxyPremium": 1,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "biologist",
-      "blsBase": 84000,
+      "blsBase": 100440,
       "socCode": "19-1029",
       "socTitle": "Biological Scientists, All Other",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "chemist",
-      "blsBase": 80890,
+      "blsBase": 95940,
       "socCode": "19-2031",
       "socTitle": "Chemists",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "physicist",
-      "blsBase": 152430,
+      "blsBase": 166000,
       "socCode": "19-2012",
       "socTitle": "Physicists",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "geoscientist",
-      "blsBase": 87480,
+      "blsBase": 111310,
       "socCode": "19-2042",
       "socTitle": "Geoscientists, Except Hydrologists and Geographers",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "environmental_scientist",
-      "blsBase": 76480,
+      "blsBase": 88640,
       "socCode": "19-2041",
       "socTitle": "Environmental Scientists and Specialists, Including Health",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "biochemist",
-      "blsBase": 100270,
+      "blsBase": 115570,
       "socCode": "19-1021",
       "socTitle": "Biochemists and Biophysicists",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "epidemiologist",
-      "blsBase": 78830,
+      "blsBase": 94160,
       "socCode": "19-1041",
       "socTitle": "Epidemiologists",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "zoologist",
-      "blsBase": 67480,
+      "blsBase": 77920,
       "socCode": "19-1023",
       "socTitle": "Zoologists and Wildlife Biologists",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "economist",
-      "blsBase": 115730,
+      "blsBase": 130910,
       "socCode": "19-3011",
       "socTitle": "Economists",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "investment_analyst",
-      "blsBase": 105000,
+      "blsBase": 116490,
       "socCode": "13-2051",
       "socTitle": "Financial and Investment Analysts",
       "isProxy": true,
       "proxyPremium": 1,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "actuary",
-      "blsBase": 120000,
+      "blsBase": 134990,
       "socCode": "15-2011",
       "socTitle": "Actuaries",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "financial_manager",
-      "blsBase": 156100,
+      "blsBase": 180470,
       "socCode": "11-3031",
       "socTitle": "Financial Managers",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "personal_financial_advisor",
-      "blsBase": 94170,
+      "blsBase": 160210,
       "socCode": "13-2052",
       "socTitle": "Personal Financial Advisors",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "portfolio_manager",
-      "blsBase": 132000,
+      "blsBase": 126752,
       "socCode": "13-2099",
       "socTitle": "Financial Specialists, All Other",
       "isProxy": true,
       "proxyPremium": 1.35,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "risk_analyst",
-      "blsBase": 98000,
+      "blsBase": 103279,
       "socCode": "13-2099",
       "socTitle": "Financial Specialists, All Other",
       "isProxy": true,
       "proxyPremium": 1.1,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "tax_specialist",
-      "blsBase": 82000,
+      "blsBase": 93520,
       "socCode": "13-2011",
       "socTitle": "Accountants and Auditors",
       "isProxy": true,
       "proxyPremium": 1,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "rn",
-      "blsBase": 81220,
+      "blsBase": 98430,
       "socCode": "29-1141",
       "socTitle": "Registered Nurses",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "icu_nurse",
-      "blsBase": 87000,
+      "blsBase": 105320,
       "socCode": "29-1141",
       "socTitle": "Registered Nurses",
       "isProxy": true,
       "proxyPremium": 1.07,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "travel_nurse",
-      "blsBase": 95000,
+      "blsBase": 116147,
       "socCode": "29-1141",
       "socTitle": "Registered Nurses",
       "isProxy": true,
       "proxyPremium": 1.18,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "nurse_manager",
-      "blsBase": 104830,
+      "blsBase": 137730,
       "socCode": "11-9111",
       "socTitle": "Medical and Health Services Managers",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "crna",
-      "blsBase": 203090,
+      "blsBase": 231700,
       "socCode": "29-1151",
       "socTitle": "Nurse Anesthetists",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "midwife",
-      "blsBase": 120880,
+      "blsBase": 128110,
       "socCode": "29-1161",
       "socTitle": "Nurse-Midwives",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "clinical_nurse",
-      "blsBase": 109000,
+      "blsBase": 103352,
       "socCode": "29-1141",
       "socTitle": "Registered Nurses",
       "isProxy": true,
       "proxyPremium": 1.05,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "nursing_professor",
-      "blsBase": 84000,
+      "blsBase": 137900,
       "socCode": "25-1071",
       "socTitle": "Health Specialties Teachers, Postsecondary",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     }
   ]
 }
