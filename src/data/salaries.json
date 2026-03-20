@@ -2,7 +2,7 @@
   "_meta": {
     "source": "BLS Occupational Employment and Wage Statistics (OES)",
     "apiEndpoint": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-    "fetchedAt": "2026-03-20T05:25:31.604Z",
+    "fetchedAt": "2026-03-20T05:46:24.814Z",
     "note": "Annual mean wages. Proxy jobs marked with isProxy=true have a proxyPremium applied."
   },
   "jobs": [
@@ -369,11 +369,11 @@
     },
     {
       "jobId": "college_professor",
-      "blsBase": 84380,
-      "socCode": "25-1099",
-      "socTitle": "Postsecondary Teachers, All Other",
+      "blsBase": 102410,
+      "socCode": "25-1000",
+      "socTitle": "Postsecondary Teachers, All",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "curriculum_developer",
@@ -402,11 +402,11 @@
     },
     {
       "jobId": "psychologist",
-      "blsBase": 90590,
-      "socCode": "19-3031",
-      "socTitle": "Clinical and Counseling Psychologists",
+      "blsBase": 111340,
+      "socCode": "19-3039",
+      "socTitle": "Psychologists, All Other",
       "isProxy": false,
-      "source": "fallback"
+      "source": "BLS OES"
     },
     {
       "jobId": "social_worker",
