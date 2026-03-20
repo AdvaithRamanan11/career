@@ -40,19 +40,29 @@ const FIELDS = [
   'latest.cost.roomboard.oncampus',
   'latest.cost.booksupply',
   'latest.cost.otherexpense',
-  // Grant aid by income bracket (IPEDS SFA survey)
-  'latest.aid.by_income.below_30000.median',
-  'latest.aid.by_income.30001_48000.median',
-  'latest.aid.by_income.48001_75000.median',
-  'latest.aid.by_income.75001_110000.median',
-  'latest.aid.by_income.over_110000.median',
+  'latest.cost.roomboard.offcampus',             // fallback if oncampus is null
+  'latest.cost.avg_net_price.overall',           // fallback when income-bracket net price is null
+  // Net price by family income bracket — public schools (NPT4x_PUB, IPEDS SFA survey)
+  // Net price = COA − all grant & scholarship aid. Directly answers "what does a student pay?"
+  'latest.cost.net_price.public.by_income_level.0-30000',
+  'latest.cost.net_price.public.by_income_level.30001-48000',
+  'latest.cost.net_price.public.by_income_level.48001-75000',
+  'latest.cost.net_price.public.by_income_level.75001-110000',
+  'latest.cost.net_price.public.by_income_level.110001-plus',
+  // Net price by family income bracket — private nonprofit schools (NPT4x_PRIV)
+  'latest.cost.net_price.private.by_income_level.0-30000',
+  'latest.cost.net_price.private.by_income_level.30001-48000',
+  'latest.cost.net_price.private.by_income_level.48001-75000',
+  'latest.cost.net_price.private.by_income_level.75001-110000',
+  'latest.cost.net_price.private.by_income_level.110001-plus',
 ].join(',')
 
-// Filters: four-year, Title IV eligible, currently operating, not purely for-profit
+// Filters: four-year, Title IV eligible, currently operating, not purely for-profit, not online-only
 const FILTERS = [
   'school.degrees_awarded.predominant=3',   // predominantly bachelor's
   'school.operating=1',                      // currently operating
   'school.ownership=1,2',                    // public or private nonprofit (exclude for-profit)
+  'school.distance_only__not=1',             // exclude fully online-only institutions
 ].join('&')
 
 async function fetchPage(page) {
@@ -88,18 +98,22 @@ function normalizeCollege(raw) {
   // For public schools use in-state tuition; for private use out-of-state (same rate)
   const tuition = ownership === 1 ? (tuitionIn ?? tuitionOut ?? 12000) : (tuitionOut ?? 35000)
 
-  const roomBoard  = raw['latest.cost.roomboard.oncampus'] ?? 12000
+  // Use on-campus room & board; fall back to off-campus if null
+  const roomBoard  = raw['latest.cost.roomboard.oncampus'] ?? raw['latest.cost.roomboard.offcampus'] ?? 12000
   const books      = raw['latest.cost.booksupply'] ?? 1200
   const other      = raw['latest.cost.otherexpense'] ?? 2000
   const booksOther = books + other
 
-  // Grant aid by family income bracket (median grant per year)
-  const grants = {
-    low:  raw['latest.aid.by_income.below_30000.median']   ?? 0,
-    mid1: raw['latest.aid.by_income.30001_48000.median']   ?? 0,
-    mid2: raw['latest.aid.by_income.48001_75000.median']   ?? 0,
-    mid3: raw['latest.aid.by_income.75001_110000.median']  ?? 0,
-    high: raw['latest.aid.by_income.over_110000.median']   ?? 0,
+  // Net price by family income bracket (what a student actually pays after all grant aid).
+  // Public and private schools report to separate IPEDS survey fields — pick by ownership.
+  // Net price can be negative for very generous schools (full ride + stipend); floor at 0.
+  const np = ownership === 1 ? 'public' : 'private'
+  const netPrice = {
+    low:  Math.max(0, raw[`latest.cost.net_price.${np}.by_income_level.0-30000`]      ?? raw['latest.cost.avg_net_price.overall'] ?? tuition),
+    mid1: Math.max(0, raw[`latest.cost.net_price.${np}.by_income_level.30001-48000`]  ?? raw['latest.cost.avg_net_price.overall'] ?? tuition),
+    mid2: Math.max(0, raw[`latest.cost.net_price.${np}.by_income_level.48001-75000`]  ?? raw['latest.cost.avg_net_price.overall'] ?? tuition),
+    mid3: Math.max(0, raw[`latest.cost.net_price.${np}.by_income_level.75001-110000`] ?? raw['latest.cost.avg_net_price.overall'] ?? tuition),
+    high: Math.max(0, raw[`latest.cost.net_price.${np}.by_income_level.110001-plus`]  ?? raw['latest.cost.avg_net_price.overall'] ?? tuition),
   }
 
   return {
@@ -113,7 +127,7 @@ function normalizeCollege(raw) {
     tuition,
     roomBoard,
     booksOther,
-    grants,
+    netPrice,
   }
 }
 
