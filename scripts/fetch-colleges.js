@@ -31,7 +31,7 @@ const FIELDS = [
   'school.name',
   'school.city',
   'school.state',
-  'school.school_url',
+  'school.distance_only',                            // 1=fully online, filter these out after fetch
   'school.ownership',                              // 1=public, 2=private nonprofit, 3=private for-profit
   'school.locale',                                 // 11-13=city, 21-23=suburb, 31-33=town, 41-43=rural
   'latest.admissions.admission_rate.overall',      // selectivity → tier
@@ -57,12 +57,11 @@ const FIELDS = [
   'latest.cost.net_price.private.by_income_level.110001-plus',
 ].join(',')
 
-// Filters: four-year, Title IV eligible, currently operating, not purely for-profit, not online-only
+// Filters: four-year, Title IV eligible, currently operating, not purely for-profit
 const FILTERS = [
   'school.degrees_awarded.predominant=3',   // predominantly bachelor's
   'school.operating=1',                      // currently operating
   'school.ownership=1,2',                    // public or private nonprofit (exclude for-profit)
-  'school.distance_only__not=1',             // exclude fully online-only institutions
 ].join('&')
 
 async function fetchPage(page) {
@@ -117,13 +116,14 @@ function normalizeCollege(raw) {
   }
 
   return {
-    id:        String(raw.id),
-    name:      raw['school.name'],
-    city:      raw['school.city'],
-    state:     raw['school.state'],
-    tier:      inferTier(admRate),
+    id:          String(raw.id),
+    name:        raw['school.name'],
+    city:        raw['school.city'],
+    state:       raw['school.state'],
+    distanceOnly: raw['school.distance_only'] === 1,
+    tier:        inferTier(admRate),
     ownership,
-    locale:    inferArea(raw['school.locale']),
+    locale:      inferArea(raw['school.locale']),
     tuition,
     roomBoard,
     booksOther,
@@ -151,8 +151,8 @@ async function main() {
     await new Promise(r => setTimeout(r, 150))
   }
 
-  // Filter out any with missing names or states
-  const clean = colleges.filter(c => c.name && c.state)
+  // Filter out any with missing names or states, and fully online-only institutions
+  const clean = colleges.filter(c => c.name && c.state && !c.distanceOnly)
 
   // Sort alphabetically by name
   clean.sort((a, b) => a.name.localeCompare(b.name))
