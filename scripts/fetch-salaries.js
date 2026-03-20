@@ -36,6 +36,41 @@ if (!API_KEY) {
 
 const BLS_API = 'https://api.bls.gov/publicAPI/v2/timeseries/data/'
 
+// ─── Area Multiplier Config ───────────────────────────────────────────────────
+// Urban proxy: average wage across top 10 U.S. metros (BLS MSA codes)
+// Suburban baseline: national mean (already fetched per job)
+// Rural proxy: BLS nonmetropolitan areas aggregate
+//
+// We compute ratios across 10 representative occupations spanning all sectors
+// to get a stable, field-agnostic area multiplier.
+const URBAN_METROS = {
+  'New York-Newark':   '0035620',
+  'Los Angeles':       '0031080',
+  'Chicago':           '0016980',
+  'San Francisco':     '0041860',
+  'Washington DC':     '0047900',
+  'Boston':            '0014460',
+  'Seattle':           '0042660',
+  'Dallas':            '0019100',
+  'Houston':           '0026420',
+  'Miami':             '0033100',
+}
+
+// Diverse cross-sector SOCs for stable area ratio computation
+// Chosen to span tech, healthcare, education, law, trades, services
+const AREA_PROXY_SOCS = [
+  '15-1252',  // Software Developers
+  '29-1141',  // Registered Nurses
+  '25-2031',  // Secondary School Teachers
+  '13-2011',  // Accountants
+  '17-2051',  // Civil Engineers
+  '23-1011',  // Lawyers
+  '27-1024',  // Graphic Designers
+  '11-1021',  // General and Operations Managers
+  '13-1111',  // Management Analysts
+  '21-1022',  // Healthcare Social Workers
+]
+
 // ─── SOC Code Mapping ────────────────────────────────────────────────────────
 // Each job maps to a BLS Standard Occupational Classification (SOC) code.
 // Where no exact SOC exists, the closest category is used (noted with *proxy*).
@@ -205,11 +240,33 @@ function socToSeriesId(soc) {
   return `OEUN0000000000000${digits}04`
 }
 
+function metroSeriesId(metroCode, soc) {
+  // Metro area annual mean wage: OE+U+M + 7-digit-metro + 000000(industry) + 6-digit-soc + 04
+  const digits = soc.replace('-', '')
+  return `OEUM${metroCode}000000${digits}04`
+}
+
+function nonmetroSeriesId(soc) {
+  // BLS nonmetropolitan areas aggregate: areatype N, area code 0000002
+  const digits = soc.replace('-', '')
+  return `OEUN0000002000000${digits}04`
+}
+
 // Deduplicate — multiple jobs share the same SOC, only fetch each series once
 const uniqueSocs = [...new Set(JOB_SOC_MAP.map(j => j.soc))]
 const seriesIds  = uniqueSocs.map(soc => ({ soc, seriesId: socToSeriesId(soc) }))
 
-console.log(`📊  ${JOB_SOC_MAP.length} jobs → ${uniqueSocs.length} unique SOC codes → ${seriesIds.length} BLS series to fetch`)
+// Build area proxy series — metro + nonmetro for representative SOCs
+const areaSeriesIds = []
+for (const soc of AREA_PROXY_SOCS) {
+  for (const [metroName, metroCode] of Object.entries(URBAN_METROS)) {
+    areaSeriesIds.push({ type: 'urban', metroName, soc, seriesId: metroSeriesId(metroCode, soc) })
+  }
+  areaSeriesIds.push({ type: 'rural', soc, seriesId: nonmetroSeriesId(soc) })
+}
+
+console.log(`📊  ${JOB_SOC_MAP.length} jobs → ${uniqueSocs.length} unique SOC codes → ${seriesIds.length} wage series`)
+console.log(`📍  ${AREA_PROXY_SOCS.length} SOCs × ${Object.keys(URBAN_METROS).length} metros + nonmetro → ${areaSeriesIds.length} area series`)
 
 // ─── BLS API Fetcher ─────────────────────────────────────────────────────────
 // BLS API v2 accepts up to 50 series per request.
@@ -310,13 +367,91 @@ async function main() {
 
   console.log(`\n✅  All ${jobs.length} jobs have live BLS data`)
 
+  // ─── Fetch area multipliers ────────────────────────────────────────────────
+  console.log('\n📍  Fetching area wage data from BLS OES...')
+  const areaWages = { urban: {}, rural: {} }
+
+  for (let i = 0; i < areaSeriesIds.length; i += BATCH_SIZE) {
+    const batch = areaSeriesIds.slice(i, i + BATCH_SIZE)
+    const batchNum = Math.floor(i / BATCH_SIZE) + 1
+    const totalBatches = Math.ceil(areaSeriesIds.length / BATCH_SIZE)
+    process.stdout.write(`   Area batch ${batchNum}/${totalBatches}...\r`)
+
+    let json
+    try {
+      json = await fetchBLSBatch(batch)
+    } catch (err) {
+      console.warn(`   ⚠ Area batch ${batchNum} failed: ${err.message} — skipping`)
+      continue
+    }
+
+    for (const series of json.Results.series) {
+      const match = batch.find(b => b.seriesId === series.seriesID)
+      if (!match) continue
+      const wage = extractAnnualWage(series)
+      if (!wage) continue
+
+      if (match.type === 'urban') {
+        if (!areaWages.urban[match.soc]) areaWages.urban[match.soc] = []
+        areaWages.urban[match.soc].push(wage)
+      } else {
+        areaWages.rural[match.soc] = wage
+      }
+    }
+
+    if (i + BATCH_SIZE < areaSeriesIds.length) {
+      await new Promise(r => setTimeout(r, 500))
+    }
+  }
+
+  // Compute area multipliers: ratio of area mean to national mean for each proxy SOC
+  // then average the ratios across all proxy SOCs for a stable cross-sector multiplier
+  const urbanRatios = []
+  const ruralRatios = []
+
+  for (const soc of AREA_PROXY_SOCS) {
+    const nationalWage = wagesBySoc[soc]
+    if (!nationalWage) continue
+
+    const urbanWages = areaWages.urban[soc]
+    if (urbanWages?.length > 0) {
+      const urbanMean = urbanWages.reduce((a, b) => a + b, 0) / urbanWages.length
+      urbanRatios.push(urbanMean / nationalWage)
+    }
+
+    const ruralWage = areaWages.rural[soc]
+    if (ruralWage) {
+      ruralRatios.push(ruralWage / nationalWage)
+    }
+  }
+
+  const avg = arr => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null
+
+  const urbanMultiplier  = urbanRatios.length  ? Math.round(avg(urbanRatios)  * 1000) / 1000 : 1.12
+  const ruralMultiplier  = ruralRatios.length  ? Math.round(avg(ruralRatios)  * 1000) / 1000 : 0.84
+
+  const areaMultipliers = {
+    Urban:    urbanMultiplier,
+    Suburban: 1.000,          // national mean is the baseline
+    Rural:    ruralMultiplier,
+  }
+
+  if (urbanRatios.length === 0) console.warn('⚠  No urban area data returned — using hardcoded fallback 1.12')
+  if (ruralRatios.length === 0) console.warn('⚠  No rural area data returned — using hardcoded fallback 0.84')
+
+  console.log('\n📍  Area multipliers derived from BLS OES metro data:')
+  console.log(`     Urban:    ${areaMultipliers.Urban}x  (avg of ${urbanRatios.length} SOC ratios across ${Object.keys(URBAN_METROS).length} metros)`)
+  console.log(`     Suburban: ${areaMultipliers.Suburban}x  (national baseline)`)
+  console.log(`     Rural:    ${areaMultipliers.Rural}x  (avg of ${ruralRatios.length} SOC nonmetro ratios)`)
+
   // Write the output
   const out = {
     _meta: {
       source:      'BLS Occupational Employment and Wage Statistics (OES)',
       apiEndpoint: 'https://api.bls.gov/publicAPI/v2/timeseries/data/',
       fetchedAt:   new Date().toISOString(),
-      note:        'Annual mean wages. Proxy jobs marked with isProxy=true have a proxyPremium applied.',
+      note:        'Annual mean wages, area multipliers, and proxy premiums. All derived from BLS OES data.',
+      areaMultipliers,
     },
     jobs,
   }
