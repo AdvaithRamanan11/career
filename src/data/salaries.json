@@ -2,7 +2,7 @@
   "_meta": {
     "source": "BLS Occupational Employment and Wage Statistics (OES)",
     "apiEndpoint": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-    "fetchedAt": "2026-03-20T05:55:53.570Z",
+    "fetchedAt": "2026-03-20T06:01:53.079Z",
     "note": "Annual mean wages, area multipliers, and proxy premiums. All derived from BLS OES data.",
     "areaMultipliers": {
       "Urban": 1.127,
