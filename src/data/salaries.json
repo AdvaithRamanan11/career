@@ -2,7 +2,7 @@
   "_meta": {
     "source": "BLS Occupational Employment and Wage Statistics (OES)",
     "apiEndpoint": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-    "fetchedAt": "2026-03-20T05:15:14.143Z",
+    "fetchedAt": "2026-03-20T05:20:41.200Z",
     "note": "Annual mean wages. Proxy jobs marked with isProxy=true have a proxyPremium applied."
   },
   "jobs": [
