@@ -8,7 +8,9 @@
 
 import collegesFromJson from './colleges.json' with { type: 'json' }
 
-export const COLLEGES = collegesFromJson
+// colleges.json structure: { _meta: { tierMultipliers, computedAt }, colleges: [...] }
+export const COLLEGES         = collegesFromJson.colleges
+export const TIER_MULTIPLIERS_FROM_SCORECARD = collegesFromJson._meta?.tierMultipliers ?? null
 
 export const INCOME_BRACKETS = [
   { label: 'Under $30,000',    key: 'low'  },
