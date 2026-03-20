@@ -195,7 +195,7 @@ function socToSeriesId(soc) {
   const digits = soc.replace('-', '')           // '15-1252' → '1512520'... wait
   // SOC '15-1252' has 6 digits. BLS series uses 7-digit occupation segment.
   // Format: remove dash → pad to 7 digits with trailing zero → '15-1252' = '1512520'
-  const padded = digits.padEnd(7, '0')
+  const padded = digits.padStart(7, '0')
   return `OEUM000000${padded}08`
 }
 
