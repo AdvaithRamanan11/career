@@ -37,12 +37,12 @@ if (!API_KEY) {
 const BLS_API = 'https://api.bls.gov/publicAPI/v2/timeseries/data/'
 
 // ─── Area Multiplier Config ───────────────────────────────────────────────────
-// Urban proxy: average wage across top 10 U.S. metros (BLS MSA codes)
-// Suburban baseline: national mean (already fetched per job)
-// Rural proxy: BLS nonmetropolitan areas aggregate
-//
-// We compute ratios across 10 representative occupations spanning all sectors
-// to get a stable, field-agnostic area multiplier.
+// Urban proxy: average wage across top 10 U.S. metros (BLS MSA codes, 7-digit)
+// Suburban baseline: national mean (already fetched per job) = 1.0
+// Rural proxy: average across 8 predominantly rural state nonmetro areas
+//   BLS publishes nonmetro data per state, not as a single national aggregate.
+//   State nonmetro area code format: state FIPS (2-digit) + '001' → 7 digits total
+//   e.g. Mississippi nonmetro = state FIPS 28 → 0028001
 const URBAN_METROS = {
   'New York-Newark':   '0035620',
   'Los Angeles':       '0031080',
@@ -54,6 +54,18 @@ const URBAN_METROS = {
   'Dallas':            '0019100',
   'Houston':           '0026420',
   'Miami':             '0033100',
+}
+
+// Rural proxies: predominantly rural state nonmetro areas (BLS area code = state FIPS + '001')
+const RURAL_NONMETROS = {
+  'Mississippi nonmetro':    '0028001',
+  'Arkansas nonmetro':       '0005001',
+  'West Virginia nonmetro':  '0054001',
+  'Iowa nonmetro':           '0019001',
+  'Montana nonmetro':        '0030001',
+  'Idaho nonmetro':          '0016001',
+  'South Dakota nonmetro':   '0046001',
+  'Wyoming nonmetro':        '0056001',
 }
 
 // Diverse cross-sector SOCs for stable area ratio computation
@@ -246,27 +258,33 @@ function metroSeriesId(metroCode, soc) {
   return `OEUM${metroCode}000000${digits}04`
 }
 
-function nonmetroSeriesId(soc) {
-  // BLS nonmetropolitan areas aggregate: areatype N, area code 0000002
+function ruralSeriesId(areaCode, soc) {
+  // BLS nonmetro areas use the same OEUM format as metro areas.
+  // Area code = state FIPS (2-digit, zero-padded to 4) + '001' = 7 digits
+  // e.g. Mississippi (FIPS 28) nonmetro → 0028001
   const digits = soc.replace('-', '')
-  return `OEUN0000002000000${digits}04`
+  return `OEUM${areaCode}000000${digits}04`
 }
 
 // Deduplicate — multiple jobs share the same SOC, only fetch each series once
 const uniqueSocs = [...new Set(JOB_SOC_MAP.map(j => j.soc))]
 const seriesIds  = uniqueSocs.map(soc => ({ soc, seriesId: socToSeriesId(soc) }))
 
-// Build area proxy series — metro + nonmetro for representative SOCs
+// Build area proxy series — metro + rural nonmetro for representative SOCs
 const areaSeriesIds = []
 for (const soc of AREA_PROXY_SOCS) {
   for (const [metroName, metroCode] of Object.entries(URBAN_METROS)) {
     areaSeriesIds.push({ type: 'urban', metroName, soc, seriesId: metroSeriesId(metroCode, soc) })
   }
-  areaSeriesIds.push({ type: 'rural', soc, seriesId: nonmetroSeriesId(soc) })
+  for (const [areaName, areaCode] of Object.entries(RURAL_NONMETROS)) {
+    areaSeriesIds.push({ type: 'rural', areaName, soc, seriesId: ruralSeriesId(areaCode, soc) })
+  }
 }
 
+const totalUrban = AREA_PROXY_SOCS.length * Object.keys(URBAN_METROS).length
+const totalRural = AREA_PROXY_SOCS.length * Object.keys(RURAL_NONMETROS).length
 console.log(`📊  ${JOB_SOC_MAP.length} jobs → ${uniqueSocs.length} unique SOC codes → ${seriesIds.length} wage series`)
-console.log(`📍  ${AREA_PROXY_SOCS.length} SOCs × ${Object.keys(URBAN_METROS).length} metros + nonmetro → ${areaSeriesIds.length} area series`)
+console.log(`📍  ${totalUrban} urban + ${totalRural} rural area series → ${areaSeriesIds.length} total`)
 
 // ─── BLS API Fetcher ─────────────────────────────────────────────────────────
 // BLS API v2 accepts up to 50 series per request.
@@ -395,7 +413,9 @@ async function main() {
         if (!areaWages.urban[match.soc]) areaWages.urban[match.soc] = []
         areaWages.urban[match.soc].push(wage)
       } else {
-        areaWages.rural[match.soc] = wage
+        // Collect all rural nonmetro wages per SOC, average them
+        if (!areaWages.rural[match.soc]) areaWages.rural[match.soc] = []
+        areaWages.rural[match.soc].push(wage)
       }
     }
 
@@ -419,9 +439,10 @@ async function main() {
       urbanRatios.push(urbanMean / nationalWage)
     }
 
-    const ruralWage = areaWages.rural[soc]
-    if (ruralWage) {
-      ruralRatios.push(ruralWage / nationalWage)
+    const ruralWages = areaWages.rural[soc]
+    if (ruralWages?.length > 0) {
+      const ruralMean = ruralWages.reduce((a, b) => a + b, 0) / ruralWages.length
+      ruralRatios.push(ruralMean / nationalWage)
     }
   }
 
@@ -438,11 +459,12 @@ async function main() {
 
   if (urbanRatios.length === 0) console.warn('⚠  No urban area data returned — using hardcoded fallback 1.12')
   if (ruralRatios.length === 0) console.warn('⚠  No rural area data returned — using hardcoded fallback 0.84')
+  else console.log(`     (${ruralRatios.length} SOC ratios across ${Object.keys(RURAL_NONMETROS).length} rural nonmetro areas)`)
 
   console.log('\n📍  Area multipliers derived from BLS OES metro data:')
   console.log(`     Urban:    ${areaMultipliers.Urban}x  (avg of ${urbanRatios.length} SOC ratios across ${Object.keys(URBAN_METROS).length} metros)`)
   console.log(`     Suburban: ${areaMultipliers.Suburban}x  (national baseline)`)
-  console.log(`     Rural:    ${areaMultipliers.Rural}x  (avg of ${ruralRatios.length} SOC nonmetro ratios)`)
+  console.log(`     Rural:    ${areaMultipliers.Rural}x  (avg of ${ruralRatios.length} SOC ratios across ${Object.keys(RURAL_NONMETROS).length} rural nonmetro areas)`)
 
   // Write the output
   const out = {
