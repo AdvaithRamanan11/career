@@ -13,41 +13,50 @@ export function calculateSalary({ college, job, area, experience }) {
 // ─── Loan Calculator ────────────────────────────────────────────────────────
 export function calculateLoan({ college, incomeKey }) {
   if (!college || !incomeKey) return null;
-  const tuition = college.tuition;
-  const roomBoard = college.roomBoard;
+  const tuition    = college.tuition;
+  const roomBoard  = college.roomBoard;
   const booksOther = college.booksOther;
-  const totalCOA = tuition + roomBoard + booksOther;
-  const grantPerYear = college.grants[incomeKey] ?? 0;
+  const totalCOA   = tuition + roomBoard + booksOther;
 
-  const federalLoanCapYear1 = 5500;
-  const loanNeededPerYear = Math.max(0, totalCOA - grantPerYear);
-  const totalLoan4Year = loanNeededPerYear * 4;
+  // Net price = COA − all grant/scholarship aid, by family income bracket.
+  // Sourced from IPEDS SFA survey via College Scorecard API (NPT4x_PUB / NPT4x_PRIV).
+  // This is what the student actually needs to cover — no subtraction needed.
+  // Fall back to full COA only if Scorecard has no net price data for this school.
+  const netPricePerYear = college.netPrice?.[incomeKey] ?? totalCOA;
 
-  // Blended rate: federal 6.53% up to federal cap, then 9.08% for remainder
+  // Federal Direct Loan annual caps for dependent undergraduates (Title IV, 2024-25):
+  //   Year 1: $5,500  Year 2: $6,500  Year 3: $7,500  Year 4: $7,500
+  //   Total:  $27,000  (NOT $5,500 × 4)
+  const federalCapTotal = 27000;
+  const federalCapYear1 = 5500;
+
+  const totalLoan4Year = Math.max(0, netPricePerYear * 4);
+
+  // Blended rate: federal 6.53% on the first $27k, then 9.08% (PLUS) on any remainder
+  // Rates are 2024-25 actuals; updated annually via fetch-rates.js (issue #9)
   const federalRate = 0.0653;
-  const plusRate = 0.0908;
-  const federalTotal = Math.min(totalLoan4Year, federalLoanCapYear1 * 4);
-  const plusTotal = Math.max(0, totalLoan4Year - federalTotal);
+  const plusRate    = 0.0908;
+  const federalPortion = Math.min(totalLoan4Year, federalCapTotal);
+  const plusPortion    = Math.max(0, totalLoan4Year - federalPortion);
   const blendedRate = totalLoan4Year > 0
-    ? (federalTotal * federalRate + plusTotal * plusRate) / totalLoan4Year
+    ? (federalPortion * federalRate + plusPortion * plusRate) / totalLoan4Year
     : federalRate;
 
   const monthlyPayment = calcMonthlyPayment(totalLoan4Year, blendedRate, 10);
-  const totalPaid = monthlyPayment * 120;
-  const totalInterest = totalPaid - totalLoan4Year;
+  const totalPaid      = monthlyPayment * 120;
+  const totalInterest  = totalPaid - totalLoan4Year;
 
   return {
     tuition,
     roomBoard,
     booksOther,
     totalCOA,
-    grantPerYear,
-    federalLoanCapYear1,
-    loanNeededPerYear,
+    netPricePerYear,                              // what student pays per year after all aid
+    federalCapYear1,                              // shown in UI for context
     totalLoan4Year,
     blendedRate,
-    monthlyPayment: Math.round(monthlyPayment),
-    totalInterest: Math.round(totalInterest),
+    monthlyPayment:  Math.round(monthlyPayment),
+    totalInterest:   Math.round(Math.max(0, totalInterest)),
   };
 }
 
