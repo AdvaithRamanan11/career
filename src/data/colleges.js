@@ -9,8 +9,9 @@
 import collegesFromJson from './colleges.json' with { type: 'json' }
 
 // colleges.json structure: { _meta: { tierMultipliers, computedAt }, colleges: [...] }
-export const COLLEGES         = collegesFromJson.colleges
-export const TIER_MULTIPLIERS_FROM_SCORECARD = collegesFromJson._meta?.tierMultipliers ?? null
+export const COLLEGES = collegesFromJson.colleges
+// Note: per-college earningsMultiplier is now stored on each college object directly.
+// No global tier multiplier table needed.
 
 export const INCOME_BRACKETS = [
   { label: 'Under $30,000',    key: 'low'  },
