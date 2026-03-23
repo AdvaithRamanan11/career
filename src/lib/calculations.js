@@ -1,13 +1,16 @@
-import { AREA_MULTIPLIERS, EXPERIENCE_MULTIPLIERS, TIER_MULTIPLIERS } from '../data/salaries.js';
+import { AREA_MULTIPLIERS, EXPERIENCE_MULTIPLIERS } from '../data/salaries.js';
 
 // ─── Salary Calculator ──────────────────────────────────────────────────────
 export function calculateSalary({ college, job, area, experience }) {
   if (!college || !job || !area || !experience) return null;
   const base = job.blsBase;
-  const tierMult = TIER_MULTIPLIERS[college.tier] ?? 1.0;
+  // earningsMultiplier is derived per-college from College Scorecard median
+  // earnings (10yr after entry) relative to the national median across all
+  // colleges. Falls back to 1.0 if somehow missing.
+  const earningsMult = college.earningsMultiplier ?? 1.0;
   const areaMult = AREA_MULTIPLIERS[area] ?? 1.0;
   const expMult = EXPERIENCE_MULTIPLIERS[experience] ?? 1.0;
-  return Math.round(base * tierMult * areaMult * expMult);
+  return Math.round(base * earningsMult * areaMult * expMult);
 }
 
 // ─── Loan Calculator ────────────────────────────────────────────────────────
