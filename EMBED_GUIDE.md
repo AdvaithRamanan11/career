@@ -18,7 +18,7 @@ Paste this single snippet into any page on your website. Works with WordPress, S
 
 ```html
 <iframe
-  src="https://careeriqdecision.netlify.app"
+  src="https://advaithramanan11.github.io/career"
   width="100%"
   height="750"
   style="border: none; border-radius: 12px; display: block;"
@@ -37,9 +37,9 @@ To make the iFrame resize automatically to fit its content, add this script afte
 ```html
 <script>
 window.addEventListener('message', function(e) {
-  if (e.origin !== 'https://careeriqdecision.netlify.app') return;
+  if (e.origin !== 'https://advaithramanan11.github.io') return;
   if (!e.data || e.data.type !== 'careeriq:resize') return;
-  document.querySelector('iframe[src*="careeriqdecision"]').style.height =
+  document.querySelector('iframe[src*="advaithramanan11.github.io"]').style.height =
     Math.max(600, e.data.height) + 'px';
 });
 </script>
@@ -49,22 +49,37 @@ window.addEventListener('message', function(e) {
 
 ## Option B: JavaScript Widget (v1.1)
 
-For tighter visual integration — mounts CareerIQ into any `<div>` on your page.
+For tighter visual integration — mounts CareerIQ into any `<div>` on your page without writing iFrame HTML yourself. The script creates a sandboxed iFrame, handles auto-resizing, and requires no additional dependencies.
 
 ```html
 <div id="careeriq-widget"></div>
 <script
-  src="https://careeriqdecision.netlify.app/embed.js"
+  src="https://advaithramanan11.github.io/career/embed.js"
   data-target="careeriq-widget">
 </script>
 ```
+
+The `<div>` must appear **before** the `<script>` tag in your HTML.
 
 **Optional attributes on the `<script>` tag:**
 
 | Attribute | Default | Description |
 |---|---|---|
-| `data-target` | `"careeriq-widget"` | ID of the div to mount into |
-| `data-height` | auto | Fixed height in px (omit for auto-resize) |
+| `data-target` | `"careeriq-widget"` | ID of the `<div>` to mount into |
+| `data-height` | auto-resize | Fixed height in px — omit to let the widget set its own height |
+
+**Example with a fixed height:**
+
+```html
+<div id="careeriq-widget"></div>
+<script
+  src="https://advaithramanan11.github.io/career/embed.js"
+  data-target="careeriq-widget"
+  data-height="800">
+</script>
+```
+
+**How it works:** `embed.js` injects a sandboxed iFrame pointed at `advaithramanan11.github.io/career`. No student data passes to your page. If you omit `data-height`, the script listens for `postMessage` events from the widget and adjusts the iFrame height automatically as the user navigates between tools.
 
 ---
 
@@ -73,7 +88,7 @@ For tighter visual integration — mounts CareerIQ into any `<div>` on your page
 | Requirement | Detail |
 |---|---|
 | HTTPS | Your site must be served over HTTPS |
-| Content Security Policy | Must allow framing from `careeriqdecision.netlify.app` |
+| Content Security Policy | Must allow framing from `advaithramanan11.github.io/career` |
 | Minimum container width | 320px (recommended 600px+) |
 | Browser support | Chrome 90+, Firefox 88+, Safari 14+, Edge 90+ |
 | Authentication | None required |
@@ -118,4 +133,4 @@ Attribution is displayed within the widget itself. You do not need to add additi
 ## Support
 
 For integration questions during initial rollout, contact the CareerIQ team.  
-Standalone URL: **careeriqdecision.netlify.app**
+Standalone URL: **advaithramanan11.github.io/career**
