@@ -12,7 +12,9 @@
  */
 
 import salariesData       from './salaries.json' with { type: 'json' }
-import { TIER_MULTIPLIERS_FROM_SCORECARD } from './colleges.js'
+// Note: TIER_MULTIPLIERS_FROM_SCORECARD no longer used for salary calculation.
+// Each college now carries its own earningsMultiplier derived from Scorecard data.
+// Tier labels are kept for UI display only.
 
 // Build a lookup map from jobId → blsBase wage
 const wageMap = Object.fromEntries(
@@ -215,16 +217,6 @@ export const EXPERIENCE_MULTIPLIERS = {
   'Early Career': 0.78,  // 2-5 yrs:  ~78% of BLS mean
   'Experienced':  1.00,  // 5-10 yrs: BLS mean wage (this IS the baseline)
   'Veteran':      1.28,  // 10+ yrs:  ~28% above BLS mean (BLS NCS senior work level)
-}
-
-// School tier salary multipliers — derived from College Scorecard median 10yr earnings
-// grouped by institutional selectivity tier. Computed annually by fetch-colleges.js.
-// Falls back to hardcoded estimates only if Scorecard earnings data is unavailable.
-export const TIER_MULTIPLIERS = TIER_MULTIPLIERS_FROM_SCORECARD ?? {
-  1: 1.35,
-  2: 1.18,
-  3: 1.05,
-  4: 0.92,
 }
 
 export const TIER_LABELS = {
