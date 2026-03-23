@@ -109,7 +109,7 @@ export default function ExportReport() {
           <p className="text-xs text-gray-400 mt-1 leading-relaxed">
             All figures represent estimated gross income based on publicly available U.S. market data. For educational and informational purposes only. Not financial or career advice.
           </p>
-          <p className="text-xs text-gray-300 mt-2">CareerIQ · CC BY 4.0 · Advaith Ramanan · careeriqdecision.netlify.app</p>
+          <p className="text-xs text-gray-300 mt-2">CareerIQ · CC BY 4.0 · Advaith Ramanan · advaithramanan11.github.io/career</p>
         </div>
       </div>
 
