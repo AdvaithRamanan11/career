@@ -160,17 +160,21 @@ async function main() {
   // Sort alphabetically by name
   clean.sort((a, b) => a.name.localeCompare(b.name))
 
-  console.log(`\n✅  Fetched ${clean.length} colleges (${clean.filter(c => c.earningsMedian).length} with earnings data)`)
+console.log(`\n✅  Fetched ${clean.length} colleges`)
 
-  // ─── Derive tier multipliers from Scorecard earnings data ──────────────────
-  // Group colleges by tier, compute median earnings per tier, then compute
-  // each tier's ratio to the overall median. This replaces hardcoded multipliers.
-  const tierEarnings = { 1: [], 2: [], 3: [], 4: [] }
-  for (const c of clean) {
-    if (c.earningsMedian && c.earningsMedian > 0) {
-      tierEarnings[c.tier]?.push(c.earningsMedian)
-    }
-  }
+  // ─── Per-college earnings multipliers ──────────────────────────────────────
+  // Each college gets its own multiplier = its Scorecard median earnings divided
+  // by the national median across all colleges with earnings data.
+  //
+  // This replaces the previous tier-grouped approach, which was skewed by
+  // specialized institutions (pharmacy colleges, maritime academies, engineering
+  // institutes) that have high field-specific earnings but open admission rates,
+  // causing Tier 4 median to exceed Tier 3 in practice.
+  //
+  // Colleges missing Scorecard earnings data fall back to their tier's median
+  // as a proxy. All multipliers are capped to [0.75, 1.60] to prevent outliers.
+  //
+  // Data source: College Scorecard latest.earnings.10_yrs_after_entry.median
 
   function median(arr) {
     if (!arr.length) return null
@@ -179,41 +183,50 @@ async function main() {
     return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2
   }
 
-  const tierMedians = {
-    1: median(tierEarnings[1]),
-    2: median(tierEarnings[2]),
-    3: median(tierEarnings[3]),
-    4: median(tierEarnings[4]),
+  const withEarnings = clean.filter(c => c.earningsMedian && c.earningsMedian > 0)
+  const overallMedian = median(withEarnings.map(c => c.earningsMedian))
+  console.log(`📊  National median earnings (baseline): $${overallMedian?.toLocaleString()}`)
+  console.log(`     ${withEarnings.length}/${clean.length} colleges have Scorecard earnings data`)
+
+  // Tier fallback medians — used only for the ~7% of colleges missing earnings data
+  const tierEarnings = { 1: [], 2: [], 3: [], 4: [] }
+  for (const c of withEarnings) tierEarnings[c.tier]?.push(c.earningsMedian)
+  const tierFallback = {}
+  for (const tier of [1, 2, 3, 4]) {
+    tierFallback[tier] = median(tierEarnings[tier]) ?? overallMedian
   }
 
-  // Overall median across all tiers (weighted baseline)
-  const allEarnings = Object.values(tierEarnings).flat()
-  const overallMedian = median(allEarnings)
+  const MIN_MULT = 0.75
+  const MAX_MULT = 1.60
+  let fallbackCount = 0
 
-  const tierMultipliers = {}
-  for (const tier of [1, 2, 3, 4]) {
-    if (tierMedians[tier] && overallMedian) {
-      tierMultipliers[tier] = Math.round((tierMedians[tier] / overallMedian) * 1000) / 1000
+  const output = clean.map(({ distanceOnly, earningsMedian, ...rest }) => {
+    let raw
+    if (earningsMedian && earningsMedian > 0 && overallMedian) {
+      raw = earningsMedian / overallMedian
     } else {
-      // Fallback if a tier has no earnings data
-      const defaults = { 1: 1.35, 2: 1.18, 3: 1.05, 4: 0.92 }
-      tierMultipliers[tier] = defaults[tier]
-      console.warn(`⚠  Tier ${tier} has no earnings data, using default multiplier ${defaults[tier]}`)
+      raw = tierFallback[rest.tier] / overallMedian
+      fallbackCount++
     }
-  }
+    const earningsMultiplier = Math.round(Math.min(MAX_MULT, Math.max(MIN_MULT, raw)) * 1000) / 1000
+    return { ...rest, earningsMultiplier }
+  })
 
-  console.log('\n📊  Tier multipliers derived from Scorecard earnings:')
-  for (const tier of [1, 2, 3, 4]) {
-    const labels = { 1: 'Elite', 2: 'Selective', 3: 'Above Average', 4: 'Average' }
-    console.log(`     Tier ${tier} (${labels[tier]}): ${tierMultipliers[tier]}x  (median earnings: $${tierMedians[tier]?.toLocaleString() ?? 'N/A'}, n=${tierEarnings[tier].length})`)
-  }
-
-  // Strip distanceOnly from final output — it was only needed for filtering
-  const output = clean.map(({ distanceOnly, ...rest }) => rest)
+  console.log(`     ${output.length - fallbackCount} colleges use individual Scorecard multipliers`)
+  console.log(`     ${fallbackCount} colleges use tier-median fallback (no Scorecard data)`)
 
   // Write colleges.json — Vite imports this at build time
   const jsonPath = path.join(__dirname, '../src/data/colleges.json')
-  fs.writeFileSync(jsonPath, JSON.stringify({ _meta: { tierMultipliers, computedAt: new Date().toISOString() }, colleges: output }, null, 2))
+  fs.writeFileSync(jsonPath, JSON.stringify({
+    _meta: {
+      computedAt: new Date().toISOString(),
+      overallMedianEarnings: overallMedian,
+      multiplierRange: [MIN_MULT, MAX_MULT],
+      scorecardsWithEarnings: withEarnings.length,
+      fallbackCount,
+    },
+    colleges: output,
+  }, null, 2))
   const kb = Math.round(fs.statSync(jsonPath).size / 1024)
   console.log(`💾  Written src/data/colleges.json (${kb}KB, ${output.length} colleges)`)
 }
