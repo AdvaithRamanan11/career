@@ -59,15 +59,23 @@ const FIELDS = [
   'latest.earnings.10_yrs_after_entry.median',    // median earnings 10yr after entry (all majors)
 ].join(',')
 
-// Filters: four-year, Title IV eligible, currently operating, not purely for-profit
-const FILTERS = [
+// Filters: Title IV eligible, currently operating, not purely for-profit
+// We run two passes — one for 4-year (predominant=3) and one for 2-year (predominant=2).
+// The API doesn't support predominant=2,3 in a single filter, so we merge after fetching.
+const FILTERS_4YEAR = [
   'school.degrees_awarded.predominant=3',   // predominantly bachelor's
-  'school.operating=1',                      // currently operating
-  'school.ownership=1,2',                    // public or private nonprofit (exclude for-profit)
+  'school.operating=1',
+  'school.ownership=1,2',
 ].join('&')
 
-async function fetchPage(page) {
-  const url = `${BASE}?api_key=${API_KEY}&fields=${FIELDS}&${FILTERS}&per_page=${PER_PAGE}&page=${page}`
+const FILTERS_2YEAR = [
+  'school.degrees_awarded.predominant=2',   // predominantly associate's (community colleges)
+  'school.operating=1',
+  'school.ownership=1,2',
+].join('&')
+
+async function fetchPage(page, filters) {
+  const url = `${BASE}?api_key=${API_KEY}&fields=${FIELDS}&${filters}&per_page=${PER_PAGE}&page=${page}`
   const res = await fetch(url)
   if (!res.ok) throw new Error(`API error ${res.status}: ${await res.text()}`)
   return res.json()
@@ -123,6 +131,7 @@ function normalizeCollege(raw) {
     city:           raw['school.city'],
     state:          raw['school.state'],
     distanceOnly:   raw['school.distance_only'] === 1,
+    schoolType:     raw['school.degrees_awarded.predominant'] === 2 ? '2-year' : '4-year',
     tier:           inferTier(admRate),
     ownership,
     locale:         inferArea(raw['school.locale']),
@@ -134,25 +143,34 @@ function normalizeCollege(raw) {
   }
 }
 
+async function fetchAllPages(filters, label) {
+  const first = await fetchPage(0, filters)
+  const total = first.metadata.total
+  const pages = Math.ceil(total / PER_PAGE)
+  console.log(`   [${label}] Found ${total} institutions across ${pages} pages`)
+
+  const colleges = first.results.map(normalizeCollege)
+  for (let page = 1; page < pages; page++) {
+    process.stdout.write(`   [${label}] Page ${page + 1}/${pages}...\r`)
+    const data = await fetchPage(page, filters)
+    colleges.push(...data.results.map(normalizeCollege))
+    await new Promise(r => setTimeout(r, 150))
+  }
+  return colleges
+}
+
 async function main() {
   console.log('📡  Fetching colleges from College Scorecard API...')
 
-  // First request to get total count
-  const first = await fetchPage(0)
-  const total = first.metadata.total
-  const pages = Math.ceil(total / PER_PAGE)
-  console.log(`   Found ${total} institutions across ${pages} pages`)
+  const [fourYear, twoYear] = await Promise.all([
+    fetchAllPages(FILTERS_4YEAR, '4-year'),
+    fetchAllPages(FILTERS_2YEAR, '2-year'),
+  ])
 
-  const colleges = first.results.map(normalizeCollege)
+  console.log(`\n   4-year institutions: ${fourYear.length}`)
+  console.log(`   2-year institutions (community colleges): ${twoYear.length}`)
 
-  // Fetch remaining pages
-  for (let page = 1; page < pages; page++) {
-    process.stdout.write(`   Page ${page + 1}/${pages}...\r`)
-    const data = await fetchPage(page)
-    colleges.push(...data.results.map(normalizeCollege))
-    // Polite delay to avoid rate limiting
-    await new Promise(r => setTimeout(r, 150))
-  }
+  const colleges = [...fourYear, ...twoYear]
 
   // Filter out any with missing names or states, and fully online-only institutions
   const clean = colleges.filter(c => c.name && c.state && !c.distanceOnly)
@@ -224,6 +242,11 @@ console.log(`\n✅  Fetched ${clean.length} colleges`)
       multiplierRange: [MIN_MULT, MAX_MULT],
       scorecardsWithEarnings: withEarnings.length,
       fallbackCount,
+      counts: {
+        total: output.length,
+        fourYear: output.filter(c => c.schoolType === '4-year').length,
+        twoYear: output.filter(c => c.schoolType === '2-year').length,
+      },
     },
     colleges: output,
   }, null, 2))
