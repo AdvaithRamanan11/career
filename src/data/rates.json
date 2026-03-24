@@ -3,20 +3,20 @@
     "source": "BLS Employment Cost Index (ECI), Wages and Salaries, Civilian Workers",
     "seriesId": "CIU2010000000000A",
     "apiEndpoint": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-    "computedAt": "2026-03-23T00:00:00.000Z"
+    "computedAt": "2026-03-24T18:33:51.870Z"
   },
-  "annualWageGrowthRate": 0.034,
+  "annualWageGrowthRate": 0.0333,
   "rollingYears": 10,
   "quarterCount": 40,
-  "periodStart": "2015 Q01",
-  "periodEnd": "2024 Q04",
+  "periodStart": "2016 Q01",
+  "periodEnd": "2025 Q04",
   "isFallback": false,
   "tax": {
     "_meta": {
-      "ficaNote": "FICA rate (6.2% SS + 1.45% Medicare = 7.65%) has been unchanged since 1990. SS wage base and standard deduction adjust annually for inflation — update each fall when IRS publishes Revenue Procedure for the new tax year.",
+      "ficaNote": "FICA rate (6.2% SS + 1.45% Medicare = 7.65%) unchanged since 1990. SS wage base and standard deduction adjust annually — update TAX_CONSTANTS in fetch-rates.js each fall.",
       "sources": [
-        "IRS Revenue Procedure 2023-34 (2024 standard deduction): https://www.irs.gov/pub/irs-drop/rp-23-34.pdf",
-        "SSA 2024 wage base: https://www.ssa.gov/news/press/factsheets/colafacts2024.pdf"
+        "IRS Revenue Procedure (standard deduction): https://www.irs.gov/newsroom/irs-releases-tax-inflation-adjustments-for-tax-year-2024",
+        "SSA wage base: https://www.ssa.gov/news/press/factsheets/colafacts2024.pdf"
       ],
       "taxYear": 2024
     },
