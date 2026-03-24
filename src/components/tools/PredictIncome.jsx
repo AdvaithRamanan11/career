@@ -39,7 +39,7 @@ export default function PredictIncome() {
       />
 
       {profileLine && (
-        <p className="text-xs text-gray-400 italic px-1">{profileLine}</p>
+        <p className="text-xs text-gray-500 italic px-1">{profileLine}</p>
       )}
 
       <div className="grid gap-4">
@@ -79,7 +79,7 @@ export default function PredictIncome() {
         </div>
       </div>
 
-      <div className="text-xs text-gray-400 border-t pt-4 space-y-1">
+      <div className="text-xs text-gray-500 border-t pt-4 space-y-1">
         <p className="font-medium text-gray-500">Data sources</p>
         <p>BLS National OES · Glassdoor · Levels.fyi · NALP · Salary.com</p>
         <p>Salary estimates reflect gross income. Actual earnings vary by employer, negotiation, and economic conditions.</p>
