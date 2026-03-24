@@ -87,16 +87,41 @@ export default function LoanEstimator() {
             </div>
           )}
 
+          {/* Community College callout */}
+          {loan.is2Year && (
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3">
+              <p className="font-semibold text-amber-800 mb-1">🏫 Community College</p>
+              <p className="text-amber-700 text-xs leading-relaxed">
+                This is a 2-year institution. The loan projection above covers <strong>2 years</strong> with a
+                federal cap of $12,000 (vs. $27,000 for a 4-year program). After earning an associate's
+                degree, many students transfer to a 4-year school — if you plan to transfer, factor in
+                additional loan costs for the remaining years.
+              </p>
+            </div>
+          )}
+
           {/* Loan Projection */}
           <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-5 text-white">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-4">4-Year Loan Projection</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-4">
+              {loan.programYears}-Year Loan Projection
+            </h3>
             <div className="text-4xl font-black mb-1">{formatCurrency(loan.totalLoan4Year)}</div>
             <div className="text-gray-500 text-sm mb-2">Estimated total loan at graduation</div>
             <p className="text-gray-500 text-xs mb-4 leading-relaxed">
-              Federal Direct Loans are capped at <span className="text-gray-300 font-semibold">7,000 total</span> over
-              4 years for dependent undergraduates (,500 freshman year, rising to ,500 by junior year).
-              Any amount above that cap is covered by PLUS loans at a higher interest rate — which is why the
-              blended rate rises as your total loan grows.
+              {loan.is2Year ? (
+                <>
+                  Federal Direct Loans are capped at <span className="text-gray-300 font-semibold">$12,000 total</span> over
+                  2 years for dependent undergraduates ($5,500 freshman year, $6,500 sophomore year).
+                  Any amount above that cap is covered by PLUS loans at a higher interest rate.
+                </>
+              ) : (
+                <>
+                  Federal Direct Loans are capped at <span className="text-gray-300 font-semibold">$27,000 total</span> over
+                  4 years for dependent undergraduates ($5,500 freshman year, rising to $7,500 by junior year).
+                  Any amount above that cap is covered by PLUS loans at a higher interest rate — which is why the
+                  blended rate rises as your total loan grows.
+                </>
+              )}
             </p>
             <div className="grid grid-cols-2 gap-3 pt-4 border-t border-white/10">
               <div>
