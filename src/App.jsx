@@ -66,16 +66,16 @@ export default function App() {
               CareerIQ
             </div>
           </div>
-          <p className="text-xs text-gray-400 mt-2 leading-relaxed">College Income &amp; Loan ROI Predictor</p>
+          <p className="text-xs text-gray-500 mt-2 leading-relaxed">College Income &amp; Loan ROI Predictor</p>
         </div>
 
         {/* Navigation */}
         <nav className="flex-1 px-3 py-4 overflow-auto">
-          <p className="text-xs font-bold uppercase tracking-widest text-gray-300 px-2 mb-2">Tools</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-gray-500 px-2 mb-2">Tools</p>
           {toolItems.map(t => (
             <NavButton key={t.id} tool={t} active={activeTool === t.id} onNavigate={navigate} />
           ))}
-          <p className="text-xs font-bold uppercase tracking-widest text-gray-300 px-2 mt-5 mb-2">More</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-gray-500 px-2 mt-5 mb-2">More</p>
           {moreItems.map(t => (
             <NavButton key={t.id} tool={t} active={activeTool === t.id} onNavigate={navigate} />
           ))}
@@ -83,8 +83,8 @@ export default function App() {
 
         {/* Attribution — required by CC BY 4.0 */}
         <div className="px-4 py-3 border-t border-gray-100">
-          <p className="text-xs text-gray-400 leading-snug">Free for nonprofit &amp; classroom use</p>
-          <p className="text-xs text-gray-300 mt-0.5">CC BY 4.0 · Advaith Ramanan</p>
+          <p className="text-xs text-gray-500 leading-snug">Free for nonprofit &amp; classroom use</p>
+          <p className="text-xs text-gray-500 mt-0.5">CC BY 4.0 · Advaith Ramanan</p>
         </div>
       </aside>
 
@@ -113,7 +113,7 @@ function NavButton({ tool, active, onNavigate }) {
           : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
       }`}
     >
-      <span className={`text-base leading-none w-5 text-center shrink-0 ${active ? 'text-teal-500' : 'text-gray-400'}`}>
+      <span className={`text-base leading-none w-5 text-center shrink-0 ${active ? 'text-teal-700' : 'text-gray-500'}`}>
         {tool.icon}
       </span>
       <span className="text-xs">{tool.label}</span>
