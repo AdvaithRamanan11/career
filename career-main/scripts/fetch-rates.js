@@ -47,24 +47,6 @@ const ROLLING_YEARS = 10
 // Fallback rate if BLS API is unavailable — based on BLS ECI 1980–2024 historical average
 const FALLBACK_RATE = 0.034
 
-// ─── Tax Constants ────────────────────────────────────────────────────────────
-// These are written into rates.json so calculations.js can read them as data
-// rather than hardcoded logic — making annual updates a single-file edit.
-//
-// FICA rate (7.65%) has been unchanged since 1990 — update only if Congress changes it.
-// socialSecurityWageBase: published each October by SSA for the following tax year.
-//   Source: https://www.ssa.gov/news/press/factsheets/colafacts<YEAR>.pdf
-// standardDeduction: published each fall by IRS in the annual Revenue Procedure.
-//   Source: https://www.irs.gov/pub/irs-drop/rp-<YY>-<NN>.pdf
-//
-// ⚠ UPDATE EACH FALL (October–November) when IRS and SSA publish new-year figures.
-const TAX_CONSTANTS = {
-  ficaRate:               0.0765,   // 6.2% SS + 1.45% Medicare — stable since 1990
-  socialSecurityWageBase: 168600,   // 2024 — update annually from SSA announcement
-  standardDeduction:      14600,    // 2024 single filer — update annually from IRS Rev. Proc.
-  taxYear:                2024,
-}
-
 async function main() {
   console.log('📡  Fetching ECI wage growth data from BLS...')
 
@@ -163,26 +145,11 @@ function writeRates(rates) {
       computedAt:  new Date().toISOString(),
     },
     ...rates,
-    // Tax constants are written here so calculations.js reads them as data,
-    // not hardcoded logic. Update TAX_CONSTANTS above each fall.
-    tax: {
-      _meta: {
-        ficaNote: 'FICA rate (6.2% SS + 1.45% Medicare = 7.65%) unchanged since 1990. SS wage base and standard deduction adjust annually — update TAX_CONSTANTS in fetch-rates.js each fall.',
-        sources: [
-          `IRS Revenue Procedure (standard deduction): https://www.irs.gov/newsroom/irs-releases-tax-inflation-adjustments-for-tax-year-${TAX_CONSTANTS.taxYear}`,
-          `SSA wage base: https://www.ssa.gov/news/press/factsheets/colafacts${TAX_CONSTANTS.taxYear}.pdf`,
-        ],
-        taxYear: TAX_CONSTANTS.taxYear,
-      },
-      ficaRate:               TAX_CONSTANTS.ficaRate,
-      socialSecurityWageBase: TAX_CONSTANTS.socialSecurityWageBase,
-      standardDeduction:      TAX_CONSTANTS.standardDeduction,
-    },
   }
 
   const outPath = path.join(__dirname, '../src/data/rates.json')
   fs.writeFileSync(outPath, JSON.stringify(out, null, 2))
-  console.log(`💾  Written src/data/rates.json (annualWageGrowthRate: ${(out.annualWageGrowthRate * 100).toFixed(2)}%, taxYear: ${TAX_CONSTANTS.taxYear})`)
+  console.log(`💾  Written src/data/rates.json (annualWageGrowthRate: ${(out.annualWageGrowthRate * 100).toFixed(2)}%)`)
 }
 
 main().catch(err => {

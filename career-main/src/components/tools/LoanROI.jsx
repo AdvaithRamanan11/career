@@ -127,16 +127,8 @@ export default function LoanROI() {
               <span className="text-sm font-semibold text-gray-800">{formatCurrency(roi.monthlyGross)}</span>
             </div>
             <div className="data-row">
-              <span className="text-sm text-gray-600">Federal income tax (~{Math.round(roi.taxes.federalEffective * 100)}%)</span>
-              <span className="text-sm font-semibold text-red-500">−{formatCurrency(roi.taxes.monthlyFederal)}</span>
-            </div>
-            <div className="data-row">
-              <span className="text-sm text-gray-600">FICA (SS + Medicare, 7.65%)</span>
-              <span className="text-sm font-semibold text-red-500">−{formatCurrency(roi.taxes.monthlyFica)}</span>
-            </div>
-            <div className="data-row">
-              <span className="text-sm text-gray-600">State income tax (~{Math.round(roi.taxes.stateRate * 100)}% avg)</span>
-              <span className="text-sm font-semibold text-red-500">−{formatCurrency(roi.taxes.monthlyState)}</span>
+              <span className="text-sm text-gray-600">Taxes (~{Math.round(roi.taxRate * 100)}%)</span>
+              <span className="text-sm font-semibold text-red-500">−{formatCurrency(roi.monthlyGross - roi.monthlyTakeHome)}</span>
             </div>
             <div className="data-row">
               <span className="text-sm text-gray-600">Take-home pay</span>
@@ -189,9 +181,9 @@ export default function LoanROI() {
         <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
           <p className="font-semibold text-amber-800 mb-1">⚠ Tax estimate note</p>
           <p className="text-amber-700 leading-relaxed">
-            Federal income tax uses 2024 brackets (single filer, $14,600 standard deduction). FICA (Social Security + Medicare)
-            is a flat 7.65%. State tax uses a national population-weighted average effective rate — students in no-income-tax
-            states (TX, FL, WA, etc.) will take home 2–5% more than shown; those in CA, NY, or NJ will take home less.
+            Take-home pay uses a national average effective rate (federal + average state tax). Your actual take-home
+            will vary by state — students in high-tax states like CA, NY, or NJ may have 3–5% less take-home than shown,
+            which can shift the ROI verdict by one category.
           </p>
         </div>
         <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3">

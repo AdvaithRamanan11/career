@@ -6,15 +6,6 @@ import ratesData from '../data/rates.json' with { type: 'json' };
 // Used for lifetime earnings projections (geometric series sum over 30 years).
 export const ANNUAL_WAGE_GROWTH = ratesData.annualWageGrowthRate;
 
-// ─── Tax Constants (sourced from rates.json — update each fall) ──────────────
-// FICA: 6.2% Social Security + 1.45% Medicare = 7.65%. Unchanged since 1990.
-// SS wage base and standard deduction adjust annually for inflation via IRS Rev. Proc.
-// Update rates.json each fall when IRS publishes the new-year Revenue Procedure.
-export const FICA_RATE          = ratesData.tax.ficaRate;               // 0.0765
-export const SS_WAGE_BASE       = ratesData.tax.socialSecurityWageBase; // $168,600 (2024)
-export const STANDARD_DEDUCTION = ratesData.tax.standardDeduction;      // $14,600 (2024)
-export const TAX_YEAR           = ratesData.tax._meta.taxYear;          // 2024
-
 // ─── Salary Calculator ──────────────────────────────────────────────────────
 export function calculateSalary({ college, job, area, experience }) {
   if (!college || !job || !area || !experience) return null;
@@ -89,9 +80,9 @@ export function calcMonthlyPayment(principal, annualRate, years) {
 // ─── ROI Calculator ─────────────────────────────────────────────────────────
 export function calculateROI({ annualSalary, loanAmount, interestRate, monthlyLiving }) {
   if (!annualSalary) return null;
-  const taxes = estimateTaxes(annualSalary);
+  const taxRate = estimateTaxRate(annualSalary);
   const monthlyGross = annualSalary / 12;
-  const monthlyTakeHome = monthlyGross - taxes.monthlyTotal;
+  const monthlyTakeHome = monthlyGross * (1 - taxRate);
   const monthlyPayment = calcMonthlyPayment(loanAmount, interestRate / 100, 10);
   const monthlyDisposable = monthlyTakeHome - monthlyPayment - monthlyLiving;
 
@@ -108,89 +99,21 @@ export function calculateROI({ annualSalary, loanAmount, interestRate, monthlyLi
     monthlyPayment: Math.round(monthlyPayment),
     monthlyLiving,
     monthlyDisposable: Math.round(monthlyDisposable),
-    taxes,
+    taxRate,
     verdict,
     color,
     ratio,
   };
 }
 
-// ─── Tax Estimator ───────────────────────────────────────────────────────────
-// Returns a breakdown of federal income tax, FICA, and average state income tax.
-// All rates reflect 2024 tax year for a single filer with standard deduction.
-
-// 2024 federal income tax brackets (single filer, standard deduction $14,600)
-const FEDERAL_BRACKETS = [
-  { upTo: 11600,  rate: 0.10 },
-  { upTo: 47150,  rate: 0.12 },
-  { upTo: 100525, rate: 0.22 },
-  { upTo: 191950, rate: 0.24 },
-  { upTo: 243725, rate: 0.32 },
-  { upTo: 609350, rate: 0.35 },
-  { upTo: Infinity, rate: 0.37 },
-];
-
-// Average effective state income tax rate by income band.
-// Derived from Tax Foundation 2024 state individual income tax data,
-// population-weighted across all 50 states + DC.
-// Students landing in a zero-tax state (TX, FL, etc.) will pay less;
-// those in CA, NY, NJ will pay more — the disclaimer notes this.
-const STATE_EFFECTIVE_RATES = [
-  { upTo: 30000,   rate: 0.020 },
-  { upTo: 50000,   rate: 0.030 },
-  { upTo: 75000,   rate: 0.038 },
-  { upTo: 100000,  rate: 0.043 },
-  { upTo: 150000,  rate: 0.048 },
-  { upTo: Infinity, rate: 0.053 },
-];
-
-// FICA: Social Security (6.2%, capped at SS_WAGE_BASE from rates.json) + Medicare (1.45%, uncapped)
-// Additional 0.9% Medicare surtax kicks in above $200k — negligible for this audience.
-// SS_WAGE_BASE and STANDARD_DEDUCTION are imported from rates.json and update annually each fall.
-const SS_RATE       = 0.062;
-const MEDICARE_RATE = 0.0145;
-
-export function estimateTaxes(annualSalary) {
-  // STANDARD_DEDUCTION and SS_WAGE_BASE come from rates.json (module-level exports above).
-  // Update rates.json each fall when IRS publishes the new-year Revenue Procedure.
-
-  // Federal income tax (marginal brackets on taxable income)
-  const taxableIncome = Math.max(0, annualSalary - STANDARD_DEDUCTION);
-  let federalTax = 0;
-  let prev = 0;
-  for (const { upTo, rate } of FEDERAL_BRACKETS) {
-    if (taxableIncome <= prev) break;
-    const slice = Math.min(taxableIncome, upTo) - prev;
-    federalTax += slice * rate;
-    prev = upTo;
-  }
-
-  // FICA
-  const ssTax       = Math.min(annualSalary, SS_WAGE_BASE) * SS_RATE;
-  const medicareTax = annualSalary * MEDICARE_RATE;
-  const ficaTax     = ssTax + medicareTax;
-
-  // State income tax (population-weighted national average effective rate)
-  const stateRate = STATE_EFFECTIVE_RATES.find(b => annualSalary <= b.upTo)?.rate ?? 0.053;
-  const stateTax  = annualSalary * stateRate;
-
-  const totalTax        = federalTax + ficaTax + stateTax;
-  const effectiveTotal  = totalTax / annualSalary;
-
-  return {
-    federalTax:    Math.round(federalTax),
-    ficaTax:       Math.round(ficaTax),
-    stateTax:      Math.round(stateTax),
-    totalTax:      Math.round(totalTax),
-    monthlyFederal: Math.round(federalTax / 12),
-    monthlyFica:    Math.round(ficaTax / 12),
-    monthlyState:   Math.round(stateTax / 12),
-    monthlyTotal:   Math.round(totalTax / 12),
-    effectiveTotal,
-    ficaRate:       ficaTax / annualSalary,
-    federalEffective: federalTax / annualSalary,
-    stateRate,
-  };
+function estimateTaxRate(annualSalary) {
+  // Simplified effective federal + avg state tax estimate
+  if (annualSalary < 40000) return 0.16;
+  if (annualSalary < 70000) return 0.22;
+  if (annualSalary < 100000) return 0.27;
+  if (annualSalary < 160000) return 0.31;
+  if (annualSalary < 250000) return 0.35;
+  return 0.39;
 }
 
 // ─── What-If Scenarios ──────────────────────────────────────────────────────

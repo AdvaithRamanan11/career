@@ -10,5 +10,18 @@
   "quarterCount": 40,
   "periodStart": "2015 Q01",
   "periodEnd": "2024 Q04",
-  "isFallback": false
+  "isFallback": false,
+  "tax": {
+    "_meta": {
+      "ficaNote": "FICA rate (6.2% SS + 1.45% Medicare = 7.65%) has been unchanged since 1990. SS wage base and standard deduction adjust annually for inflation — update each fall when IRS publishes Revenue Procedure for the new tax year.",
+      "sources": [
+        "IRS Revenue Procedure 2023-34 (2024 standard deduction): https://www.irs.gov/pub/irs-drop/rp-23-34.pdf",
+        "SSA 2024 wage base: https://www.ssa.gov/news/press/factsheets/colafacts2024.pdf"
+      ],
+      "taxYear": 2024
+    },
+    "ficaRate": 0.0765,
+    "socialSecurityWageBase": 168600,
+    "standardDeduction": 14600
+  }
 }

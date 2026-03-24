@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!--
+      Viewport: device-width so the widget is usable on mobile,
+      but NO forced zoom — the host site controls layout.
+    -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="CareerIQ — Free embeddable college income and loan ROI predictor for nonprofits and high school students." />
+    <title>CareerIQ — College Income &amp; Loan ROI Predictor</title>
+    <style>
+      /*
+        When loaded as an iFrame src, this page is transparent —
+        the widget fills the frame. When visited directly (standalone URL),
+        it renders centered on a neutral background.
+      */
+      html, body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: #f4f5f7;
+      }
+      #root {
+        /* On direct visit: centered with breathing room */
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 24px 16px 48px;
+      }
+      /* Inside iFrame: fill the frame fully */
+      @media (max-width: 600px) {
+        #root { padding: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+
+    <!--
+      postMessage height relay:
+      After the app mounts and on every resize, tell the parent frame
+      how tall the widget actually is so the host can size the iFrame.
+    -->
+    <script>
+      function relayHeight() {
+        const h = document.body.scrollHeight
+        window.parent.postMessage({ type: 'careeriq:resize', height: h }, '*')
+      }
+      window.addEventListener('load', relayHeight)
+      // ResizeObserver watches the root div for content-driven height changes
+      if (typeof ResizeObserver !== 'undefined') {
+        const ro = new ResizeObserver(relayHeight)
+        ro.observe(document.getElementById('root'))
+      }
+    </script>
+  </body>
+</html>

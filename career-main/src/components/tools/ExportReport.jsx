@@ -192,7 +192,7 @@ export default function ExportReport() {
               <ProfileRow label="Disposable income" value={`${formatCurrency(roi.monthlyDisposable)}/mo`} />
             </div>
             <p className="text-xs text-gray-400 mt-2">
-              Living expenses use a national default of {formatCurrency(DEFAULT_MONTHLY_LIVING)}/mo. Tax includes federal income tax (2024 brackets), FICA (7.65%), and avg state income tax. Actual figures vary by state and lifestyle.
+              Living expenses use a national default of {formatCurrency(DEFAULT_MONTHLY_LIVING)}/mo. Tax uses national avg effective rate. Actual figures vary by state and lifestyle.
             </p>
           </div>
         ) : null}
@@ -203,7 +203,7 @@ export default function ExportReport() {
             <span className="font-semibold text-gray-500">Data sources:</span> BLS National OES · College Scorecard · IPEDS · Federal Student Aid · Glassdoor · Salary.com
           </p>
           <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-            All figures are estimates based on publicly available U.S. market data. Tax includes 2024 federal income tax brackets, FICA (Social Security 6.2% + Medicare 1.45%), and a national average state income tax — actual take-home varies by state. Loan models 10-year standard repayment; income-driven repayment (IDR) plans may lower monthly payments. For educational purposes only. Not financial or career advice.
+            All figures are estimates based on publicly available U.S. market data. Tax uses national average effective rate — varies by state. Loan models 10-year standard repayment; income-driven repayment (IDR) plans may lower monthly payments. For educational purposes only. Not financial or career advice.
           </p>
           <p className="text-xs text-gray-500 mt-2">CareerIQ · CC BY 4.0 · Advaith Ramanan · advaithramanan11.github.io/career</p>
         </div>
