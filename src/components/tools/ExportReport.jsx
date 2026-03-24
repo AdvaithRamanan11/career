@@ -64,7 +64,7 @@ export default function ExportReport() {
 
         {/* Profile */}
         <div className="px-6 py-4 bg-gray-50 border-b border-gray-100">
-          <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Student Profile</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Student Profile</p>
           <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-sm">
             <ProfileRow label="College" value={college?.name ?? '—'} />
             <ProfileRow label="State" value={college ? `${college.city}, ${college.state}` : '—'} />
@@ -79,7 +79,7 @@ export default function ExportReport() {
         {/* Salary results */}
         {salary ? (
           <div className="px-6 py-5">
-            <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">Estimated Salary</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4">Estimated Salary</p>
             <div className="text-5xl font-black text-gray-900 mb-1">{formatCurrency(salary)}</div>
             <p className="text-gray-500 text-sm mb-4">Estimated annual gross income</p>
             <div className="grid grid-cols-3 gap-3">
@@ -90,26 +90,26 @@ export default function ExportReport() {
               ].map(({ label, value }) => (
                 <div key={label} className="bg-gray-50 rounded-xl p-3 text-center">
                   <div className="font-bold text-gray-800">{formatCurrency(value)}</div>
-                  <div className="text-xs text-gray-400 mt-0.5">{label}</div>
+                  <div className="text-xs text-gray-500 mt-0.5">{label}</div>
                 </div>
               ))}
             </div>
           </div>
         ) : (
-          <div className="px-6 py-8 text-center text-gray-400 text-sm">
+          <div className="px-6 py-8 text-center text-gray-500 text-sm">
             Complete the profile above to generate your salary estimate.
           </div>
         )}
 
         {/* Footer */}
         <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
-          <p className="text-xs text-gray-400 leading-relaxed">
+          <p className="text-xs text-gray-500 leading-relaxed">
             <span className="font-semibold text-gray-500">Data sources:</span> BLS National OES · College Scorecard · IPEDS · Glassdoor · Levels.fyi · NALP · Salary.com
           </p>
-          <p className="text-xs text-gray-400 mt-1 leading-relaxed">
+          <p className="text-xs text-gray-500 mt-1 leading-relaxed">
             All figures represent estimated gross income based on publicly available U.S. market data. For educational and informational purposes only. Not financial or career advice.
           </p>
-          <p className="text-xs text-gray-300 mt-2">CareerIQ · CC BY 4.0 · Advaith Ramanan · advaithramanan11.github.io/career</p>
+          <p className="text-xs text-gray-500 mt-2">CareerIQ · CC BY 4.0 · Advaith Ramanan · advaithramanan11.github.io/career</p>
         </div>
       </div>
 
@@ -124,11 +124,11 @@ export default function ExportReport() {
           Print / Save as PDF
         </button>
         {!canExport && (
-          <p className="text-xs text-center text-gray-400">Complete college, major, and job title to enable export.</p>
+          <p className="text-xs text-center text-gray-500">Complete college, major, and job title to enable export.</p>
         )}
       </div>
 
-      <div className="text-xs text-gray-400 border-t pt-4 no-print">
+      <div className="text-xs text-gray-500 border-t pt-4 no-print">
         <p>Use your browser's Print dialog to save as PDF. Works in Chrome, Firefox, Safari, and Edge.</p>
       </div>
     </div>
@@ -138,7 +138,7 @@ export default function ExportReport() {
 function ProfileRow({ label, value }) {
   return (
     <div>
-      <span className="text-gray-400">{label}: </span>
+      <span className="text-gray-500">{label}: </span>
       <span className="font-medium text-gray-700">{value}</span>
     </div>
   )
