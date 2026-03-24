@@ -1,20 +1,26 @@
-import { create } from 'zustand'
+import { create } from 'zustand';
 
-// This MUST be exported as "useStore" to match your imports in App.jsx
 export const useStore = create((set) => ({
-  // Original Navigation Logic
-  activeTool: 'predict',
-  setActiveTool: (id) => set({ activeTool: id }),
+  // Shared profile inputs
+  college: null,
+  major: null,
+  job: null,
+  area: "Suburban",
+  experience: "Entry",
+  incomeKey: "mid1",
 
-  // New Community College Logic
-  institutionType: '4-year', 
-  setInstitutionType: (type) => set({ institutionType: type }),
+  // Loan estimator snapshot for Smart Auto-Fill
+  loanSnapshot: null,
 
-  // Original Selection Logic
-  selectedCollege: null,
-  setSelectedCollege: (college) => set({ selectedCollege: college }),
+  // Navigation
+  activeTool: "predict",
 
-  // Original Financial Logic
-  incomeBracket: 2,
-  setIncomeBracket: (index) => set({ incomeBracket: index }),
-}))
+  setCollege: (college) => set({ college }),
+  setMajor: (major) => set({ major, job: null }),
+  setJob: (job) => set({ job }),
+  setArea: (area) => set({ area }),
+  setExperience: (experience) => set({ experience }),
+  setIncomeKey: (incomeKey) => set({ incomeKey }),
+  setActiveTool: (activeTool) => set({ activeTool }),
+  setLoanSnapshot: (loanSnapshot) => set({ loanSnapshot }),
+}));
