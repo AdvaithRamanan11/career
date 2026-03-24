@@ -62,17 +62,42 @@ export default function LoanEstimator() {
 
           {/* Financial Aid */}
           <div className="bg-white rounded-2xl border border-gray-200 p-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">Financial Aid Estimate (per year)</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Financial Aid Estimate (per year)</h3>
+            <p className="text-xs text-gray-400 mb-3 leading-relaxed">
+              <span className="font-semibold text-gray-500">Net price</span> is what you actually pay after all grants
+              and scholarships are subtracted — it's the amount you need to cover through savings, work, or loans.
+              This figure comes from IPEDS survey data for your family income bracket.
+            </p>
             <DataRow label="Net Price (after all grant aid)" value={formatCurrency(loan.netPricePerYear)} />
             <DataRow label="Federal Loan Cap (Year 1)" value={formatCurrency(loan.federalCapYear1)} />
             <DataRow label="Est. Loan Needed / Year" value={formatCurrency(loan.netPricePerYear)} highlight />
           </div>
 
+          {/* Full Aid Callout */}
+          {loan.netPricePerYear < 2000 && (
+            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-3">
+              <p className="font-semibold text-emerald-800 mb-1">🎓 Full financial aid likely</p>
+              <p className="text-emerald-700 text-xs leading-relaxed">
+                This school's net price for your income bracket is very low — it likely has a
+                full financial aid policy for families at this income level, meaning grants and
+                scholarships cover most or all of the cost. Your estimated loan burden below
+                reflects this. Always verify directly on the school's financial aid page, as
+                policies and eligibility criteria vary.
+              </p>
+            </div>
+          )}
+
           {/* Loan Projection */}
           <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-5 text-white">
             <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-4">4-Year Loan Projection</h3>
             <div className="text-4xl font-black mb-1">{formatCurrency(loan.totalLoan4Year)}</div>
-            <div className="text-gray-500 text-sm mb-4">Estimated total loan at graduation</div>
+            <div className="text-gray-500 text-sm mb-2">Estimated total loan at graduation</div>
+            <p className="text-gray-500 text-xs mb-4 leading-relaxed">
+              Federal Direct Loans are capped at <span className="text-gray-300 font-semibold">7,000 total</span> over
+              4 years for dependent undergraduates (,500 freshman year, rising to ,500 by junior year).
+              Any amount above that cap is covered by PLUS loans at a higher interest rate — which is why the
+              blended rate rises as your total loan grows.
+            </p>
             <div className="grid grid-cols-2 gap-3 pt-4 border-t border-white/10">
               <div>
                 <div className="text-white font-bold text-xl">{formatCurrency(loan.monthlyPayment)}</div>

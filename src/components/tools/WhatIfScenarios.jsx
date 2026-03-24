@@ -91,8 +91,12 @@ export default function WhatIfScenarios() {
             </div>
           ))}
 
-          <div className="bg-gray-50 rounded-xl p-3 text-xs text-gray-500">
-            <span className="font-semibold text-gray-500">How to read this:</span> Percentages are relative to the Entry · Suburban baseline. Green = higher, red = lower.
+          <div className="bg-gray-50 rounded-2xl border border-gray-100 p-4 text-xs text-gray-500 space-y-2">
+            <p className="font-semibold text-gray-600 text-sm">How to read this grid</p>
+            <p>Each cell shows your estimated salary for one combination of career stage and location. The <span className="text-teal-600 font-semibold">teal baseline</span> is Entry level in a Suburban area — the most common starting point for recent graduates. Every other cell shows the percentage change from that baseline.</p>
+            <p><span className="font-semibold text-gray-600">Urban vs. Rural:</span> Urban salaries are higher, but so is the cost of living. A rural salary that looks lower on paper may actually leave you with more disposable income once rent and transportation are factored in. Use the Loan ROI tool to compare real take-home after expenses.</p>
+            <p><span className="font-semibold text-gray-600">Experience levels:</span> Entry is 0–2 years. Early Career is 2–5 years. Experienced is 5–10 years. Veteran is 10+ years. The jumps between levels reflect typical raises and promotions in this field — they're not guaranteed and vary significantly by employer.</p>
+            <p className="text-gray-400">All figures are gross income estimates based on BLS national data. Actual earnings vary by employer, negotiation, and local market conditions.</p>
           </div>
         </div>
       ) : (

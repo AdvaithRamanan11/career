@@ -177,6 +177,19 @@ export default function LoanROI() {
               }
             </p>
           </div>
+          {/* Verdict explanation */}
+          <div className="bg-gray-50 rounded-2xl border border-gray-100 p-4 text-xs text-gray-500 space-y-2">
+            <p className="font-semibold text-gray-600 text-sm">What does your verdict mean?</p>
+            <div className="space-y-1.5">
+              <p><span className="font-semibold text-emerald-600">Comfortable (30%+ left over)</span> — Your salary comfortably covers your loan and living costs with meaningful money to save or invest each month.</p>
+              <p><span className="font-semibold text-yellow-600">Manageable (15–30% left over)</span> — You can cover your costs, but your budget is tight. One unexpected expense could create stress. Building an emergency fund should be a priority.</p>
+              <p><span className="font-semibold text-orange-600">Tight (0–15% left over)</span> — You can technically make payments, but there's very little margin. Consider whether income-driven repayment (IDR) could lower your monthly payment.</p>
+              <p><span className="font-semibold text-red-600">At Risk (negative)</span> — Your estimated take-home doesn't cover your loan payment and living costs. This doesn't mean the path is impossible — IDR plans can cap payments at 5–10% of discretionary income — but it's a serious signal to explore alternatives.</p>
+            </div>
+            <p className="text-gray-400 pt-1">
+              <span className="font-semibold">Debt-to-income ratio</span> is the percentage of your gross monthly income that goes toward loan payments. Lenders and financial planners generally consider under 10% healthy; above 20% is considered a strain.
+            </p>
+          </div>
         </div>
       ) : (
         <div className="rounded-2xl bg-gray-50 border border-gray-100 p-8 text-center">
