@@ -44,6 +44,12 @@ jobs:
           BLS_API_KEY: ${{ secrets.BLS_API_KEY }}
         run: node scripts/fetch-salaries.js
 
+      - name: Fetch wage growth rate (BLS ECI)
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        env:
+          BLS_API_KEY: ${{ secrets.BLS_API_KEY }}
+        run: node scripts/fetch-rates.js
+
       - name: Build production bundle
         run: npm run build
 
@@ -52,7 +58,7 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add src/data/colleges.json src/data/salaries.json
+          git add src/data/colleges.json src/data/salaries.json src/data/rates.json
           git diff --staged --quiet || git commit -m "data: annual data refresh $(date +%Y)"
           git push
 
