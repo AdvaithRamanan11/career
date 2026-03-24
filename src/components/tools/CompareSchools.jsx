@@ -86,7 +86,9 @@ export default function CompareSchools() {
                 <div className={`text-xs ${winner === side ? 'text-teal-100' : 'text-gray-500'}`}>Annual est. salary</div>
                 <div className={`mt-3 pt-3 border-t ${winner === side ? 'border-teal-400' : 'border-gray-100'}`}>
                   <div className={`text-sm font-bold ${winner === side ? 'text-white' : 'text-gray-700'}`}>{formatCurrency(lifetime, true)}</div>
-                  <div className={`text-xs ${winner === side ? 'text-teal-100' : 'text-gray-500'}`}>30-yr lifetime earnings</div>
+                  <div className={`text-xs ${winner === side ? 'text-teal-100' : 'text-gray-500'}`}>
+                    {side === 'A' ? result.yearsA ?? 30 : result.yearsB ?? 30}-yr lifetime earnings
+                  </div>
                 </div>
               </div>
             ))}
@@ -97,18 +99,32 @@ export default function CompareSchools() {
             <div className="text-2xl font-black text-gray-800">{formatPct(result.pctDiff)}</div>
             <div className="text-sm text-gray-500 mt-1">salary difference between schools</div>
             <div className="text-xs text-gray-400 mt-2">
-              {formatCurrency(Math.abs(result.lifetimeDiff))} lifetime earnings gap over 30 years
+              {formatCurrency(Math.abs(result.lifetimeDiff))} lifetime earnings gap
             </div>
             <div className="text-xs text-gray-300 mt-1">
               Assumes {(ANNUAL_WAGE_GROWTH * 100).toFixed(1)}% annual wage growth (BLS ECI 10-yr avg)
             </div>
           </div>
 
+          {/* 2-year vs 4-year note */}
+          {(result.yearsA !== result.yearsB) && (
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 text-xs text-amber-700">
+              <p className="font-semibold text-amber-800 mb-1">⏱ Different program lengths</p>
+              <p>
+                One school is a 2-year community college and one is a 4-year institution.
+                Lifetime earnings are projected over <strong>{result.yearsA} years</strong> and <strong>{result.yearsB} years</strong> respectively
+                to reflect the same career endpoint — community college grads enter the workforce 2 years earlier.
+                This comparison shows earning potential, not total cost. Run both schools through the Loan Estimator
+                to compare debt burden.
+              </p>
+            </div>
+          )}
+
           {/* Interpretation note */}
           <div className="bg-gray-50 rounded-2xl border border-gray-100 p-4 text-xs text-gray-500 space-y-2">
             <p className="font-semibold text-gray-600 text-sm">How to interpret this comparison</p>
             <p>The salary difference shows which school's graduates tend to earn more in this career — but a higher-earning school almost always costs more too. The real question is whether the salary premium is worth the extra debt.</p>
-            <p><span className="font-semibold text-gray-600">Lifetime earnings</span> projects your total income over a 30-year career, assuming a {(ANNUAL_WAGE_GROWTH * 100).toFixed(1)}% annual raise each year. The gap looks large because small annual differences compound significantly over decades — the same reason interest on a loan adds up.</p>
+            <p><span className="font-semibold text-gray-600">Lifetime earnings</span> projects your total income over a career assuming a {(ANNUAL_WAGE_GROWTH * 100).toFixed(1)}% annual raise each year. The gap looks large because small annual differences compound significantly over decades — the same reason interest on a loan adds up.</p>
             <p><span className="font-semibold text-gray-600">What this doesn't show:</span> the difference in cost between the two schools. To get the full picture, run both schools through the Loan Estimator and compare your loan burden side by side with this salary gap.</p>
             <p className="text-gray-400">For educational illustration only. Salary projections are national estimates and do not account for individual performance, employer, or economic conditions.</p>
           </div>
