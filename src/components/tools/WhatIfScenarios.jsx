@@ -49,7 +49,7 @@ export default function WhatIfScenarios() {
           {/* Area header */}
           <div className="grid grid-cols-3 gap-2 px-1">
             {AREA_ORDER.map(a => (
-              <div key={a} className="text-center text-xs font-bold uppercase tracking-widest text-gray-400">
+              <div key={a} className="text-center text-xs font-bold uppercase tracking-widest text-gray-500">
                 {AREA_ICONS[a]} {a}
               </div>
             ))}
@@ -58,7 +58,7 @@ export default function WhatIfScenarios() {
           {/* Scenario grid: 4 rows × 3 cols */}
           {byExp.map(({ exp, areas }, rowIdx) => (
             <div key={exp}>
-              <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">{exp}</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">{exp}</p>
               <div className="grid grid-cols-3 gap-2">
                 {areas.map(({ area, salary, pctChange }) => {
                   const isBase = exp === 'Entry' && area === 'Suburban'
@@ -77,7 +77,7 @@ export default function WhatIfScenarios() {
                         {formatCurrency(salary, true)}
                       </div>
                       {!isBase && (
-                        <div className={`text-xs font-semibold mt-1 ${isPositive ? 'text-emerald-600' : isNegative ? 'text-red-500' : 'text-gray-400'}`}>
+                        <div className={`text-xs font-semibold mt-1 ${isPositive ? 'text-emerald-600' : isNegative ? 'text-red-500' : 'text-gray-500'}`}>
                           {formatPct(pctChange)}
                         </div>
                       )}
@@ -91,18 +91,18 @@ export default function WhatIfScenarios() {
             </div>
           ))}
 
-          <div className="bg-gray-50 rounded-xl p-3 text-xs text-gray-400">
+          <div className="bg-gray-50 rounded-xl p-3 text-xs text-gray-500">
             <span className="font-semibold text-gray-500">How to read this:</span> Percentages are relative to the Entry · Suburban baseline. Green = higher, red = lower.
           </div>
         </div>
       ) : (
         <div className="rounded-2xl bg-gray-50 border border-gray-100 p-8 text-center">
           <div className="text-4xl mb-3">◫</div>
-          <p className="text-gray-400 text-sm">Select a college, major, and job title to generate all 12 scenarios.</p>
+          <p className="text-gray-500 text-sm">Select a college, major, and job title to generate all 12 scenarios.</p>
         </div>
       )}
 
-      <div className="text-xs text-gray-400 border-t pt-4">
+      <div className="text-xs text-gray-500 border-t pt-4">
         <p>BLS OES · Salary.com · BEA Regional Data. All figures are gross income estimates.</p>
       </div>
     </div>
