@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useStore } from '../../store/useStore.js'
 import { MAJORS, AREA_MULTIPLIERS, EXPERIENCE_MULTIPLIERS } from '../../data/salaries.js'
-import { compareSchools, formatCurrency, formatPct } from '../../lib/calculations.js'
+import { compareSchools, formatCurrency, formatPct, ANNUAL_WAGE_GROWTH } from '../../lib/calculations.js'
 import { useState } from 'react'
 import { COLLEGES } from '../../data/colleges.js'
 import CollegeSearch from '../ui/CollegeSearch.jsx'
@@ -100,7 +100,7 @@ export default function CompareSchools() {
               {formatCurrency(Math.abs(result.lifetimeDiff))} lifetime earnings gap (flat projection)
             </div>
             <div className="text-xs text-gray-300 mt-1">
-              Actual earnings likely 30–40% higher with 2–3% annual growth
+              Assumes {(ANNUAL_WAGE_GROWTH * 100).toFixed(1)}% annual wage growth (BLS ECI 10-yr avg)
             </div>
           </div>
         </div>
