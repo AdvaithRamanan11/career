@@ -1,4 +1,10 @@
 import { AREA_MULTIPLIERS, EXPERIENCE_MULTIPLIERS } from '../data/salaries.js';
+import ratesData from '../data/rates.json' with { type: 'json' };
+
+// Annual wage growth rate — 10-year rolling average from BLS Employment Cost Index.
+// Updated annually at build time by scripts/fetch-rates.js.
+// Used for lifetime earnings projections (geometric series sum over 30 years).
+export const ANNUAL_WAGE_GROWTH = ratesData.annualWageGrowthRate;
 
 // ─── Salary Calculator ──────────────────────────────────────────────────────
 export function calculateSalary({ college, job, area, experience }) {
@@ -128,12 +134,22 @@ export function generateScenarios({ college, job }) {
 }
 
 // ─── Comparison ─────────────────────────────────────────────────────────────
+// Sum of geometric series: salary * ((1 + r)^n - 1) / r
+// This gives the total earnings over n years assuming salary grows at rate r per year.
+// Much more realistic than salary * n (flat projection) — accounts for raises and
+// cost-of-living adjustments over a career. Rate sourced from BLS ECI (see rates.json).
+export function lifetimeEarnings(startingSalary, years = 30) {
+  if (!startingSalary || startingSalary <= 0) return 0;
+  const r = ANNUAL_WAGE_GROWTH;
+  return Math.round(startingSalary * (Math.pow(1 + r, years) - 1) / r);
+}
+
 export function compareSchools({ collegeA, collegeB, job, area, experience }) {
   if (!collegeA || !collegeB || !job) return null;
   const salaryA = calculateSalary({ college: collegeA, job, area, experience });
   const salaryB = calculateSalary({ college: collegeB, job, area, experience });
-  const lifetimeA = salaryA * 30;
-  const lifetimeB = salaryB * 30;
+  const lifetimeA = lifetimeEarnings(salaryA);
+  const lifetimeB = lifetimeEarnings(salaryB);
   const pctDiff = salaryA > 0 ? ((salaryB - salaryA) / salaryA) * 100 : 0;
   const lifetimeDiff = lifetimeB - lifetimeA;
   return { salaryA, salaryB, lifetimeA, lifetimeB, pctDiff, lifetimeDiff };
