@@ -83,10 +83,10 @@ export default function CompareSchools() {
                 <div className={`text-3xl font-black mb-1 ${winner === side ? 'text-white' : 'text-gray-800'}`}>
                   {formatCurrency(salary)}
                 </div>
-                <div className={`text-xs ${winner === side ? 'text-teal-200' : 'text-gray-400'}`}>Annual est. salary</div>
+                <div className={`text-xs ${winner === side ? 'text-teal-100' : 'text-gray-500'}`}>Annual est. salary</div>
                 <div className={`mt-3 pt-3 border-t ${winner === side ? 'border-teal-400' : 'border-gray-100'}`}>
                   <div className={`text-sm font-bold ${winner === side ? 'text-white' : 'text-gray-700'}`}>{formatCurrency(lifetime, true)}</div>
-                  <div className={`text-xs ${winner === side ? 'text-teal-200' : 'text-gray-400'}`}>30-yr lifetime earnings</div>
+                  <div className={`text-xs ${winner === side ? 'text-teal-100' : 'text-gray-500'}`}>30-yr lifetime earnings</div>
                 </div>
               </div>
             ))}
@@ -107,11 +107,11 @@ export default function CompareSchools() {
       ) : (
         <div className="rounded-2xl bg-gray-50 border border-gray-100 p-8 text-center">
           <div className="text-4xl mb-3">⇄</div>
-          <p className="text-gray-400 text-sm">Select two schools, a major, and job title to compare.</p>
+          <p className="text-gray-500 text-sm">Select two schools, a major, and job title to compare.</p>
         </div>
       )}
 
-      <div className="text-xs text-gray-400 border-t pt-4">
+      <div className="text-xs text-gray-500 border-t pt-4">
         <p>BLS OES · College Scorecard · IPEDS · For educational purposes only.</p>
       </div>
     </div>
