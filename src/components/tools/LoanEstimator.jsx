@@ -53,7 +53,7 @@ export default function LoanEstimator() {
         <div className="space-y-4">
           {/* Cost of Attendance */}
           <div className="bg-white rounded-2xl border border-gray-200 p-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Cost of Attendance (per year)</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">Cost of Attendance (per year)</h3>
             <DataRow label="Tuition & Fees" value={formatCurrency(loan.tuition)} />
             <DataRow label="Room & Board" value={formatCurrency(loan.roomBoard)} />
             <DataRow label="Books & Other" value={formatCurrency(loan.booksOther)} />
@@ -62,7 +62,7 @@ export default function LoanEstimator() {
 
           {/* Financial Aid */}
           <div className="bg-white rounded-2xl border border-gray-200 p-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Financial Aid Estimate (per year)</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">Financial Aid Estimate (per year)</h3>
             <DataRow label="Net Price (after all grant aid)" value={formatCurrency(loan.netPricePerYear)} />
             <DataRow label="Federal Loan Cap (Year 1)" value={formatCurrency(loan.federalCapYear1)} />
             <DataRow label="Est. Loan Needed / Year" value={formatCurrency(loan.netPricePerYear)} highlight />
@@ -70,18 +70,18 @@ export default function LoanEstimator() {
 
           {/* Loan Projection */}
           <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-5 text-white">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-4">4-Year Loan Projection</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-4">4-Year Loan Projection</h3>
             <div className="text-4xl font-black mb-1">{formatCurrency(loan.totalLoan4Year)}</div>
-            <div className="text-gray-400 text-sm mb-4">Estimated total loan at graduation</div>
+            <div className="text-gray-500 text-sm mb-4">Estimated total loan at graduation</div>
             <div className="grid grid-cols-2 gap-3 pt-4 border-t border-white/10">
               <div>
                 <div className="text-white font-bold text-xl">{formatCurrency(loan.monthlyPayment)}</div>
-                <div className="text-gray-400 text-xs">Est. monthly payment</div>
+                <div className="text-gray-500 text-xs">Est. monthly payment</div>
                 <div className="text-gray-500 text-xs">(10-yr standard repayment)</div>
               </div>
               <div>
                 <div className="text-white font-bold text-xl">{formatCurrency(loan.totalInterest)}</div>
-                <div className="text-gray-400 text-xs">Total interest paid</div>
+                <div className="text-gray-500 text-xs">Total interest paid</div>
                 <div className="text-gray-500 text-xs">Blended rate: {(loan.blendedRate * 100).toFixed(2)}%</div>
               </div>
             </div>
@@ -102,7 +102,7 @@ export default function LoanEstimator() {
         </div>
       )}
 
-      <div className="text-xs text-gray-400 border-t pt-4 space-y-1">
+      <div className="text-xs text-gray-500 border-t pt-4 space-y-1">
         <p className="font-medium text-gray-500">Data sources</p>
         <p>IPEDS SFA Survey · College Scorecard API · Federal Student Aid</p>
         <p>COA figures may lag current academic year by 12–18 months. For educational purposes only.</p>
