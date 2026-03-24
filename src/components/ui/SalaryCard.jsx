@@ -3,9 +3,9 @@ import { formatCurrency } from "../../lib/calculations.js";
 export default function SalaryCard({ annual, monthly, weekly, hourly, label = "Estimated Annual Salary", badge }) {
   const isEmpty = !annual;
   return (
-    <div className={`rounded-2xl p-6 transition-all duration-500 ${isEmpty ? "bg-gray-100" : "bg-gradient-to-br from-[#1A9E8F] to-[#0d7a6e]"}`}>
+    <div className={`rounded-2xl p-6 transition-all duration-500 ${isEmpty ? "bg-gray-100" : "bg-gradient-to-br from-teal-700 to-teal-900"}`}>
       <div className="flex items-start justify-between mb-2">
-        <p className={`text-sm font-medium ${isEmpty ? "text-gray-400" : "text-teal-100"}`}>{label}</p>
+        <p className={`text-sm font-medium ${isEmpty ? "text-gray-500" : "text-teal-100"}`}>{label}</p>
         {badge && <span className="text-xs font-bold px-2 py-1 rounded-full bg-white/20 text-white tracking-wider">{badge}</span>}
       </div>
       <div className={`text-5xl font-black tracking-tight mb-4 ${isEmpty ? "text-gray-300" : "text-white"}`}>
@@ -20,7 +20,7 @@ export default function SalaryCard({ annual, monthly, weekly, hourly, label = "E
           ].map(({ label, value }) => (
             <div key={label} className="text-center">
               <div className="text-white font-bold text-lg">{formatCurrency(value)}</div>
-              <div className="text-teal-200 text-xs mt-0.5">{label}</div>
+              <div className="text-white/80 text-xs mt-0.5">{label}</div>
             </div>
           ))}
         </div>
