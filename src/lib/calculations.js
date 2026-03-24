@@ -37,41 +37,44 @@ export function calculateLoan({ college, incomeKey }) {
   const totalCOA   = tuition + roomBoard + booksOther;
 
   // Net price = COA − all grant/scholarship aid, by family income bracket.
-  // Sourced from IPEDS SFA survey via College Scorecard API (NPT4x_PUB / NPT4x_PRIV).
-  // This is what the student actually needs to cover — no subtraction needed.
-  // Fall back to full COA only if Scorecard has no net price data for this school.
   const netPricePerYear = college.netPrice?.[incomeKey] ?? totalCOA;
 
+  // Determine program length from schoolType field (added in fetch-colleges.js v2).
+  // Community colleges (2-year) have a shorter program and different federal loan caps.
+  const is2Year = college.schoolType === '2-year';
+  const programYears = is2Year ? 2 : 4;
+
   // Federal Direct Loan annual caps for dependent undergraduates (Title IV, 2024-25):
-  //   Year 1: $5,500  Year 2: $6,500  Year 3: $7,500  Year 4: $7,500
-  //   Total:  $27,000  (NOT $5,500 × 4)
-  const federalCapTotal = 27000;
+  //   4-year: Year 1 $5,500 | Year 2 $6,500 | Years 3-4 $7,500 each → Total $27,000
+  //   2-year: Year 1 $5,500 | Year 2 $6,500                         → Total $12,000
+  const federalCapTotal = is2Year ? 12000 : 27000;
   const federalCapYear1 = 5500;
 
-  const totalLoan4Year = Math.max(0, netPricePerYear * 4);
+  const totalLoan = Math.max(0, netPricePerYear * programYears);
 
-  // Blended rate: federal 6.53% on the first $27k, then 9.08% (PLUS) on any remainder
-  // Rates are 2024-25 actuals; updated annually via fetch-rates.js (issue #9)
+  // Blended rate: federal 6.53% on the capped portion, then 9.08% (PLUS) on any remainder
   const federalRate = 0.0653;
   const plusRate    = 0.0908;
-  const federalPortion = Math.min(totalLoan4Year, federalCapTotal);
-  const plusPortion    = Math.max(0, totalLoan4Year - federalPortion);
-  const blendedRate = totalLoan4Year > 0
-    ? (federalPortion * federalRate + plusPortion * plusRate) / totalLoan4Year
+  const federalPortion = Math.min(totalLoan, federalCapTotal);
+  const plusPortion    = Math.max(0, totalLoan - federalPortion);
+  const blendedRate = totalLoan > 0
+    ? (federalPortion * federalRate + plusPortion * plusRate) / totalLoan
     : federalRate;
 
-  const monthlyPayment = calcMonthlyPayment(totalLoan4Year, blendedRate, 10);
+  const monthlyPayment = calcMonthlyPayment(totalLoan, blendedRate, 10);
   const totalPaid      = monthlyPayment * 120;
-  const totalInterest  = totalPaid - totalLoan4Year;
+  const totalInterest  = totalPaid - totalLoan;
 
   return {
     tuition,
     roomBoard,
     booksOther,
     totalCOA,
-    netPricePerYear,                              // what student pays per year after all aid
-    federalCapYear1,                              // shown in UI for context
-    totalLoan4Year,
+    netPricePerYear,
+    federalCapYear1,
+    programYears,
+    is2Year,
+    totalLoan4Year: totalLoan,  // kept for backward compat with LoanROI auto-fill
     blendedRate,
     monthlyPayment:  Math.round(monthlyPayment),
     totalInterest:   Math.round(Math.max(0, totalInterest)),
@@ -225,11 +228,18 @@ export function compareSchools({ collegeA, collegeB, job, area, experience }) {
   if (!collegeA || !collegeB || !job) return null;
   const salaryA = calculateSalary({ college: collegeA, job, area, experience });
   const salaryB = calculateSalary({ college: collegeB, job, area, experience });
-  const lifetimeA = lifetimeEarnings(salaryA);
-  const lifetimeB = lifetimeEarnings(salaryB);
+
+  // Community college grads enter the workforce up to 2 years earlier.
+  // To compare on equal footing (same retirement age ~65), extend their earning
+  // window by 2 years so the lifetime projection covers the same career span.
+  const yearsA = collegeA.schoolType === '2-year' ? 32 : 30;
+  const yearsB = collegeB.schoolType === '2-year' ? 32 : 30;
+
+  const lifetimeA = lifetimeEarnings(salaryA, yearsA);
+  const lifetimeB = lifetimeEarnings(salaryB, yearsB);
   const pctDiff = salaryA > 0 ? ((salaryB - salaryA) / salaryA) * 100 : 0;
   const lifetimeDiff = lifetimeB - lifetimeA;
-  return { salaryA, salaryB, lifetimeA, lifetimeB, pctDiff, lifetimeDiff };
+  return { salaryA, salaryB, lifetimeA, lifetimeB, pctDiff, lifetimeDiff, yearsA, yearsB };
 }
 
 // ─── Formatters ──────────────────────────────────────────────────────────────
