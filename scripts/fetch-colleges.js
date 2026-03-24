@@ -34,6 +34,7 @@ const FIELDS = [
   'school.distance_only',                            // 1=fully online, filter these out after fetch
   'school.ownership',                              // 1=public, 2=private nonprofit, 3=private for-profit
   'school.locale',                                 // 11-13=city, 21-23=suburb, 31-33=town, 41-43=rural
+  'school.degrees_awarded.predominant',            // 2=associate's (community college), 3=bachelor's
   'latest.admissions.admission_rate.overall',      // selectivity → tier
   'latest.cost.tuition.in_state',
   'latest.cost.tuition.out_of_state',
