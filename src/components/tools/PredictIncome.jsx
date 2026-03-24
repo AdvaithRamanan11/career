@@ -4,10 +4,10 @@ import data from '../../data/colleges.json'
 import Fuse from 'fuse.js'
 
 export default function PredictIncome() {
-  const { institutionType, setInstitutionType, setSelectedCollege, selectedCollege } = useStore()
+  const { institutionType, setInstitutionType, setSelectedCollege } = useStore()
   const [query, setQuery] = useState('')
 
-  // Split list by degreeType: 3 = University, 1/2 = Community College
+  // Filters the data by degreeType (1/2 for CC, 3 for Univ)
   const filteredColleges = useMemo(() => {
     return data.colleges.filter(c => 
       institutionType === '4-year' ? c.degreeType === 3 : c.degreeType < 3
@@ -24,14 +24,14 @@ export default function PredictIncome() {
   return (
     <div className="space-y-6">
       <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-        <label className="section-title">Step 1: School Type</label>
+        <label className="section-title">Step 1: Path Selection</label>
         <div className="grid grid-cols-2 gap-3 mt-3">
           {['4-year', '2-year'].map((t) => (
             <button
               key={t}
               onClick={() => { setInstitutionType(t); setSelectedCollege(null); setQuery(''); }}
-              className={`py-3.5 rounded-xl font-bold text-sm transition-all ${
-                institutionType === t ? 'bg-teal-500 text-white shadow-md' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
+              className={`py-3 rounded-xl font-bold text-sm transition-all ${
+                institutionType === t ? 'bg-teal-500 text-white' : 'bg-gray-50 text-gray-500'
               }`}
             >
               {t === '4-year' ? 'University' : 'Community College'}
@@ -41,13 +41,13 @@ export default function PredictIncome() {
       </div>
 
       <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm relative">
-        <label className="section-title">Step 2: Search for School</label>
+        <label className="section-title">Step 2: Find Your School</label>
         <input 
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder={`Search ${institutionType === '4-year' ? 'Universities' : 'Community Colleges'}...`}
-          className="input-field mt-3"
+          placeholder="Search institutions..."
+          className="input-field mt-3" 
         />
         {results.length > 0 && (
           <div className="absolute left-6 right-6 mt-1 bg-white border border-gray-100 rounded-xl shadow-xl z-50 overflow-hidden">
