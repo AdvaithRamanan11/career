@@ -177,8 +177,42 @@ export default function LoanROI() {
         </div>
       )}
 
-      <div className="text-xs text-gray-500 border-t pt-4">
-        <p>Tax estimates are approximate effective rates (federal + average state). For educational purposes only.</p>
+      <div className="text-xs text-gray-500 border-t pt-4 space-y-2">
+        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+          <p className="font-semibold text-amber-800 mb-1">⚠ Tax estimate note</p>
+          <p className="text-amber-700 leading-relaxed">
+            Take-home pay uses a national average effective rate (federal + average state tax). Your actual take-home
+            will vary by state — students in high-tax states like CA, NY, or NJ may have 3–5% less take-home than shown,
+            which can shift the ROI verdict by one category.
+          </p>
+        </div>
+        <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3">
+          <p className="font-semibold text-blue-800 mb-1">ℹ Income-driven repayment (IDR)</p>
+          <p className="text-blue-700 leading-relaxed">
+            This tool models standard 10-year repayment only. If your loan burden looks Tight or At Risk,
+            income-driven repayment plans (IBR, SAVE, PAYE) can significantly lower your monthly payment.
+            Students in public service careers may also qualify for{' '}
+            <a
+              href="https://studentaid.gov/manage-loans/forgiveness-cancellation/public-service"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline text-blue-600"
+            >
+              Public Service Loan Forgiveness
+            </a>
+            . Visit{' '}
+            <a
+              href="https://studentaid.gov/idr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline text-blue-600"
+            >
+              studentaid.gov/idr
+            </a>{' '}
+            to learn more.
+          </p>
+        </div>
+        <p className="text-gray-400">For educational purposes only. Not financial advice.</p>
       </div>
     </div>
   )

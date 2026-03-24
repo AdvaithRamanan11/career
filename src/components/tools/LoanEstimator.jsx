@@ -102,10 +102,26 @@ export default function LoanEstimator() {
         </div>
       )}
 
-      <div className="text-xs text-gray-500 border-t pt-4 space-y-1">
+      <div className="text-xs text-gray-500 border-t pt-4 space-y-2">
         <p className="font-medium text-gray-500">Data sources</p>
         <p>IPEDS SFA Survey · College Scorecard API · Federal Student Aid</p>
         <p>COA figures may lag current academic year by 12–18 months. For educational purposes only.</p>
+        <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 mt-2">
+          <p className="font-semibold text-blue-800 mb-1">ℹ About repayment options</p>
+          <p className="text-blue-700 leading-relaxed">
+            Monthly payment above assumes standard 10-year repayment. Income-driven repayment plans (IBR, SAVE, PAYE)
+            can significantly lower your monthly payment if your income is limited after graduation. Visit{' '}
+            <a
+              href="https://studentaid.gov/idr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline text-blue-600"
+            >
+              studentaid.gov/idr
+            </a>{' '}
+            to compare options.
+          </p>
+        </div>
       </div>
     </div>
   );

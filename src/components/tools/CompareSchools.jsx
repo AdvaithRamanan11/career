@@ -111,8 +111,30 @@ export default function CompareSchools() {
         </div>
       )}
 
-      <div className="text-xs text-gray-500 border-t pt-4">
+      <div className="text-xs text-gray-500 border-t pt-4 space-y-2">
         <p>BLS OES · College Scorecard · IPEDS · For educational purposes only.</p>
+        <details>
+          <summary className="cursor-pointer font-medium text-gray-500 hover:text-gray-700 transition-colors">
+            ℹ How salary and lifetime earnings are calculated
+          </summary>
+          <div className="mt-2 bg-gray-50 rounded-xl p-3 space-y-1 text-gray-500 leading-relaxed">
+            <p>
+              <span className="font-semibold">Salary estimate:</span> BLS national mean wage for the selected
+              job title, adjusted by each college's earnings multiplier (from College Scorecard median earnings
+              10 years after entry), location, and experience level.
+            </p>
+            <p>
+              <span className="font-semibold">30-year lifetime earnings:</span> Calculated as the sum of a
+              geometric series assuming a {(ANNUAL_WAGE_GROWTH * 100).toFixed(1)}% annual wage growth rate
+              (BLS Employment Cost Index 10-year average), starting from the estimated salary. This is more
+              realistic than a flat projection because it accounts for raises and cost-of-living adjustments
+              over a career.
+            </p>
+            <p className="text-gray-400 pt-1">
+              For educational illustration only. Actual earnings depend on many individual factors.
+            </p>
+          </div>
+        </details>
       </div>
     </div>
   )
