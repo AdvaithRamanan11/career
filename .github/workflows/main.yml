@@ -33,19 +33,16 @@ jobs:
         run: npm install
 
       - name: Fetch colleges (College Scorecard API)
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         env:
           COLLEGE_SCORECARD_API_KEY: ${{ secrets.COLLEGE_SCORECARD_API_KEY }}
         run: node scripts/fetch-colleges.js
 
       - name: Fetch salaries (BLS OES API)
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         env:
           BLS_API_KEY: ${{ secrets.BLS_API_KEY }}
         run: node scripts/fetch-salaries.js
 
       - name: Fetch wage growth rate (BLS ECI)
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         env:
           BLS_API_KEY: ${{ secrets.BLS_API_KEY }}
         run: node scripts/fetch-rates.js
@@ -54,7 +51,6 @@ jobs:
         run: npm run build
 
       - name: Commit updated data
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
