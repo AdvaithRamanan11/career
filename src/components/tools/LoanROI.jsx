@@ -81,7 +81,7 @@ export default function LoanROI() {
 
       {/* Loan inputs */}
       <div className="bg-white rounded-2xl border border-gray-100 p-5 space-y-4">
-        <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Loan Details</p>
+        <p className="text-xs font-bold uppercase tracking-widest text-gray-500">Loan Details</p>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="input-label">Loan Amount ($)</label>
@@ -121,7 +121,7 @@ export default function LoanROI() {
         <div className="space-y-4 animate-fade-up">
           {/* Monthly breakdown */}
           <div className="bg-white rounded-2xl border border-gray-100 p-5 space-y-0">
-            <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Monthly Breakdown</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">Monthly Breakdown</p>
             <div className="data-row">
               <span className="text-sm text-gray-600">Gross income</span>
               <span className="text-sm font-semibold text-gray-800">{formatCurrency(roi.monthlyGross)}</span>
@@ -173,11 +173,11 @@ export default function LoanROI() {
       ) : (
         <div className="rounded-2xl bg-gray-50 border border-gray-100 p-8 text-center">
           <div className="text-4xl mb-3">◎</div>
-          <p className="text-gray-400 text-sm">Complete the salary inputs above to see your ROI assessment.</p>
+          <p className="text-gray-500 text-sm">Complete the salary inputs above to see your ROI assessment.</p>
         </div>
       )}
 
-      <div className="text-xs text-gray-400 border-t pt-4">
+      <div className="text-xs text-gray-500 border-t pt-4">
         <p>Tax estimates are approximate effective rates (federal + average state). For educational purposes only.</p>
       </div>
     </div>
