@@ -30,43 +30,42 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
+        working-directory: career-main
         run: npm install
 
       - name: Fetch colleges (College Scorecard API)
+        working-directory: career-main
         env:
           COLLEGE_SCORECARD_API_KEY: ${{ secrets.COLLEGE_SCORECARD_API_KEY }}
         run: node scripts/fetch-colleges.js
 
       - name: Fetch salaries (BLS OES API)
+        working-directory: career-main
         env:
           BLS_API_KEY: ${{ secrets.BLS_API_KEY }}
         run: node scripts/fetch-salaries.js
 
       - name: Fetch wage growth rate (BLS ECI)
+        working-directory: career-main
         env:
           BLS_API_KEY: ${{ secrets.BLS_API_KEY }}
         run: node scripts/fetch-rates.js
 
       - name: Build production bundle
+        working-directory: career-main
         run: npm run build
 
       - name: Commit updated data
+        working-directory: career-main
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add src/data/colleges.json src/data/salaries.json src/data/rates.json
           git diff --staged --quiet || git commit -m "data: annual data refresh $(date +%Y)"
           git pull --rebase origin main
-          git push 
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
+          git push
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          path: career-main/dist   # ← also fix this path
