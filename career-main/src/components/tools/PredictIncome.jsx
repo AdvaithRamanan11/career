@@ -82,15 +82,15 @@ export default function PredictIncome() {
       <div className="text-xs text-gray-500 border-t pt-4 space-y-2">
         <p className="font-medium text-gray-500">Data sources</p>
         <p>BLS National OES · Glassdoor · Levels.fyi · NALP · Salary.com</p>
-        <p>Salary estimates reflect gross income. Actual earnings vary by employer, negotiation, and economic conditions.</p>
+        <p>Salary estimates reflect gross median income. Actual earnings vary by employer, negotiation, and economic conditions.</p>
         <details className="mt-2">
           <summary className="cursor-pointer font-medium text-gray-500 hover:text-gray-700 transition-colors">
             ℹ How this estimate is calculated
           </summary>
           <div className="mt-2 bg-gray-50 rounded-xl p-3 space-y-1 text-gray-500 leading-relaxed">
             <p>
-              <span className="font-semibold">Step 1 — BLS base wage:</span> Each job title starts with its national
-              mean annual wage from the BLS Occupational Employment and Wage Statistics (OES) survey.
+              <span className="font-semibold">Step 1 — BLS median wage:</span> Each job title starts with its national
+              median annual wage from the BLS Occupational Employment and Wage Statistics (OES) survey.
             </p>
             <p>
               <span className="font-semibold">Step 2 — College earnings multiplier:</span> Each college carries a
