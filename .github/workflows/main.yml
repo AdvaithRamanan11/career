@@ -56,7 +56,8 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add src/data/colleges.json src/data/salaries.json src/data/rates.json
           git diff --staged --quiet || git commit -m "data: annual data refresh $(date +%Y)"
-          git push
+          git pull --rebase origin main
+          git push 
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
