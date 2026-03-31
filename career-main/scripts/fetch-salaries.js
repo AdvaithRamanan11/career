@@ -249,13 +249,13 @@ function socToSeriesId(soc) {
   //   04       = Datatype 04 = Annual mean wage (2)
   // Example: Software Developers 15-1252 → OEUN000000000000015125204
   const digits = soc.replace('-', '')   // '15-1252' → '151252' (always 6 chars)
-  return `OEUN0000000000000${digits}04`
+  return `OEUN0000000000000${digits}03`
 }
 
 function metroSeriesId(metroCode, soc) {
   // Metro area annual mean wage: OE+U+M + 7-digit-metro + 000000(industry) + 6-digit-soc + 04
   const digits = soc.replace('-', '')
-  return `OEUM${metroCode}000000${digits}04`
+  return `OEUM${metroCode}000000${digits}03`
 }
 
 function ruralSeriesId(areaCode, soc) {
@@ -263,7 +263,7 @@ function ruralSeriesId(areaCode, soc) {
   // Area code = state FIPS (2-digit, zero-padded to 4) + '001' = 7 digits
   // e.g. Mississippi (FIPS 28) nonmetro → 0028001
   const digits = soc.replace('-', '')
-  return `OEUM${areaCode}000000${digits}04`
+  return `OEUM${areaCode}000000${digits}03`
 }
 
 // Deduplicate — multiple jobs share the same SOC, only fetch each series once
