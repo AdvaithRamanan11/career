@@ -237,7 +237,11 @@ const PROXY_PREMIUMS = {
 }
 
 // ─── Build BLS Series IDs ────────────────────────────────────────────────────
-// OES national annual median wage series: OEUN000000{SOC_7digit}03
+// OES national annual mean wage series: OEUN000000{SOC_7digit}08
+// NOTE: We use datatype 08 (annual mean wage) rather than 03 (annual median wage).
+// BLS suppresses median wages for many occupations with smaller sample sizes
+// (notably many education and some healthcare SOC codes), while mean wages are
+// published for all occupations. Mean and median are within ~5% for most jobs.
 function socToSeriesId(soc) {
   // BLS OES series ID — exactly 25 characters:
   //   OE       = Occupational Employment & Wage Statistics survey (2)
@@ -246,16 +250,16 @@ function socToSeriesId(soc) {
   //   0000000  = National area code, 7 digits (7)
   //   000000   = All industries, 6 digits (6)
   //   151252   = SOC code digits without dash, always 6 digits (6)
-  //   03       = Datatype 03 = Annual median wage (2)
-  // Example: Software Developers 15-1252 → OEUN000000000000015125203
+  //   08       = Datatype 08 = Annual mean wage (2)
+  // Example: Software Developers 15-1252 → OEUN000000000000015125208
   const digits = soc.replace('-', '')   // '15-1252' → '151252' (always 6 chars)
-  return `OEUN0000000000000${digits}03`
+  return `OEUN0000000000000${digits}08`
 }
 
 function metroSeriesId(metroCode, soc) {
-  // Metro area annual median wage: OE+U+M + 7-digit-metro + 000000(industry) + 6-digit-soc + 03
+  // Metro area annual mean wage: OE+U+M + 7-digit-metro + 000000(industry) + 6-digit-soc + 08
   const digits = soc.replace('-', '')
-  return `OEUM${metroCode}000000${digits}03`
+  return `OEUM${metroCode}000000${digits}08`
 }
 
 function ruralSeriesId(areaCode, soc) {
@@ -263,7 +267,7 @@ function ruralSeriesId(areaCode, soc) {
   // Area code = state FIPS (2-digit, zero-padded to 4) + '001' = 7 digits
   // e.g. Mississippi (FIPS 28) nonmetro → 0028001
   const digits = soc.replace('-', '')
-  return `OEUM${areaCode}000000${digits}03`
+  return `OEUM${areaCode}000000${digits}08`
 }
 
 // Deduplicate — multiple jobs share the same SOC, only fetch each series once
@@ -472,7 +476,7 @@ async function main() {
       source:      'BLS Occupational Employment and Wage Statistics (OES)',
       apiEndpoint: 'https://api.bls.gov/publicAPI/v2/timeseries/data/',
       fetchedAt:   new Date().toISOString(),
-      note:        'Annual median wages, area multipliers, and proxy premiums. All derived from BLS OES data.',
+      note:        'Annual mean wages (datatype 08), area multipliers, and proxy premiums. All derived from BLS OES data. Mean wages are used instead of median (03) because BLS suppresses median for lower-sample occupations (e.g. many education SOC codes).',
       areaMultipliers,
     },
     jobs,
