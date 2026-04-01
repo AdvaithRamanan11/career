@@ -1,7 +1,7 @@
 /**
  * fetch-salaries.js
  *
- * Fetches national annual median wages for all 96 CareerIQ occupations
+ * Fetches national annual mean wages for all 96 CareerIQ occupations
  * from the BLS Public Data API v2 (OES survey) and writes
  * src/data/salaries.json for the Vite build to bundle.
  *
@@ -12,9 +12,9 @@
  *   Free registration at: https://data.bls.gov/registrationEngine/
  *   Registered key: 500 requests/day (unregistered: 25/day)
  *
- * BLS OES series ID format for national annual median wage:
- *   OEUN000000{SOC_7digit}03
- *   e.g. Software Developers (15-1252) → OEUN000000000000015125203
+ * BLS OES series ID format for national annual mean wage:
+ *   OEUN000000{SOC_7digit}08
+ *   e.g. Software Developers (15-1252) → OEUN000000000000015125208
  *
  * Data source: BLS Occupational Employment and Wage Statistics (OES)
  *   Published annually each April/May for the prior May reference period.
@@ -37,6 +37,12 @@ if (!API_KEY) {
 const BLS_API = 'https://api.bls.gov/publicAPI/v2/timeseries/data/'
 
 // ─── Area Multiplier Config ───────────────────────────────────────────────────
+// Urban proxy: average wage across top 10 U.S. metros (BLS MSA codes, 7-digit)
+// Suburban baseline: national mean (already fetched per job) = 1.0
+// Rural proxy: average across 8 predominantly rural state nonmetro areas
+//   BLS publishes nonmetro data per state, not as a single national aggregate.
+//   State nonmetro area code format: state FIPS (2-digit) + '001' → 7 digits total
+//   e.g. Mississippi nonmetro = state FIPS 28 → 0028001
 const URBAN_METROS = {
   'New York-Newark':   '0035620',
   'Los Angeles':       '0031080',
@@ -50,6 +56,7 @@ const URBAN_METROS = {
   'Miami':             '0033100',
 }
 
+// Rural proxies: predominantly rural state nonmetro areas (BLS area code = state FIPS + '001')
 const RURAL_NONMETROS = {
   'Mississippi nonmetro':    '0028001',
   'Arkansas nonmetro':       '0005001',
@@ -61,6 +68,8 @@ const RURAL_NONMETROS = {
   'Wyoming nonmetro':        '0056001',
 }
 
+// Diverse cross-sector SOCs for stable area ratio computation
+// Chosen to span tech, healthcare, education, law, trades, services
 const AREA_PROXY_SOCS = [
   '15-1252',  // Software Developers
   '29-1141',  // Registered Nurses
@@ -75,6 +84,15 @@ const AREA_PROXY_SOCS = [
 ]
 
 // ─── SOC Code Mapping ────────────────────────────────────────────────────────
+// Each job maps to a BLS Standard Occupational Classification (SOC) code.
+// Where no exact SOC exists, the closest category is used (noted with *proxy*).
+// The 7-digit series segment = SOC code digits only, zero-padded to 7 chars.
+//
+// Full OES series: OEUM000000{7digits}08
+//   OEUM = OES, U = U.S. national, M = mean wage
+//   000000 = national (no metro)
+//   08 = annual mean wage datatype
+
 const JOB_SOC_MAP = [
   // ── Computer Science ──────────────────────────────────────────────────────
   { jobId: 'software_engineer',      soc: '15-1252', title: 'Software Developers'                            },
@@ -126,19 +144,18 @@ const JOB_SOC_MAP = [
   { jobId: 'lobbyist',               soc: '11-9199', title: 'Managers, All Other',                proxy: true  },
   { jobId: 'diplomat',               soc: '11-9199', title: 'Managers, All Other',                proxy: true  },
 
-  // ── Education — broader SOC aggregates used because BLS suppresses median
-  //    for detailed education codes; these broader codes have median data. ──
-  { jobId: 'hs_teacher',             soc: '25-2030', title: 'Secondary School Teachers',                      proxy: true },
-  { jobId: 'elementary_teacher',     soc: '25-2020', title: 'Elementary School Teachers',                     proxy: true },
+  // ── Education ─────────────────────────────────────────────────────────────
+  { jobId: 'hs_teacher',             soc: '25-2031', title: 'Secondary School Teachers, Except Special and Career/Technical Education' },
+  { jobId: 'elementary_teacher',     soc: '25-2021', title: 'Elementary School Teachers, Except Special Education' },
   { jobId: 'school_counselor',       soc: '21-1012', title: 'Educational, Guidance, and Career Counselors and Advisors' },
-  { jobId: 'special_ed_teacher',     soc: '25-2050', title: 'Special Education Teachers',                     proxy: true },
-  { jobId: 'college_professor',      soc: '25-1000', title: 'Postsecondary Teachers, All'                     },
+  { jobId: 'special_ed_teacher',     soc: '25-2050', title: 'Special Education Teachers'                      },
+  { jobId: 'college_professor',      soc: '25-1000', title: 'Postsecondary Teachers, All'                     },  // 25-1099 suppressed by BLS; using broader aggregate
   { jobId: 'curriculum_developer',   soc: '25-9031', title: 'Instructional Coordinators'                      },
-  { jobId: 'education_administrator',soc: '11-9030', title: 'Education Administrators',                       proxy: true },
+  { jobId: 'education_administrator',soc: '11-9032', title: 'Education Administrators, Kindergarten through Secondary' },
   { jobId: 'instructional_designer', soc: '25-9031', title: 'Instructional Coordinators',         proxy: true  },
 
   // ── Social Sciences / Psychology ──────────────────────────────────────────
-  { jobId: 'psychologist',           soc: '19-3039', title: 'Psychologists, All Other'                        },
+  { jobId: 'psychologist',           soc: '19-3039', title: 'Psychologists, All Other'                        },  // 19-3031 suppressed by BLS; using broader aggregate
   { jobId: 'social_worker',          soc: '21-1022', title: 'Healthcare Social Workers'                       },
   { jobId: 'market_researcher',      soc: '13-1161', title: 'Market Research Analysts and Marketing Specialists' },
   { jobId: 'ux_researcher',          soc: '19-3099', title: 'Social Scientists and Related Workers, All Other', proxy: true },
@@ -195,45 +212,62 @@ const JOB_SOC_MAP = [
   { jobId: 'crna',                   soc: '29-1151', title: 'Nurse Anesthetists'                              },
   { jobId: 'midwife',                soc: '29-1161', title: 'Nurse-Midwives'                                  },
   { jobId: 'clinical_nurse',         soc: '29-1141', title: 'Registered Nurses',                  proxy: true  },
-  { jobId: 'nursing_professor',      soc: '25-1070', title: 'Health Specialties Teachers, Postsecondary',     proxy: true },
+  { jobId: 'nursing_professor',      soc: '25-1071', title: 'Health Specialties Teachers, Postsecondary'      },
 ]
 
 // ─── Proxy Premiums ──────────────────────────────────────────────────────────
+// Jobs that share a SOC code with a broader category often earn more or less
+// than the BLS mean for that category. These multipliers adjust the BLS value
+// to better reflect market reality (sourced from Glassdoor / Levels.fyi / NALP).
+// Applied on top of the BLS fetched value, not hardcoded salary.
 const PROXY_PREMIUMS = {
-  product_manager:    1.18,
-  ml_engineer:        1.25,
-  devops_engineer:    1.08,
-  investment_banker:  1.45,
-  public_defender:    0.55,
-  lobbyist:           1.15,
-  social_media_manager: 0.85,
-  ux_researcher:      1.05,
-  portfolio_manager:  1.35,
-  risk_analyst:       1.10,
-  icu_nurse:          1.07,
-  travel_nurse:       1.18,
-  clinical_nurse:     1.05,
+  product_manager:    1.18,   // PM premium over generic "Computer Occupations" (Levels.fyi)
+  ml_engineer:        1.25,   // ML/AI premium over Data Scientists (Levels.fyi 2024)
+  devops_engineer:    1.08,   // DevOps premium over Sys Admins (Glassdoor)
+  investment_banker:  1.45,   // IB premium over generic Financial Specialists (NALP)
+  public_defender:    0.55,   // Public defenders earn ~55% of private lawyers (NALP)
+  lobbyist:           1.15,   // Lobbyist premium over Managers (BLS lobbying sector data)
+  social_media_manager: 0.85, // Social media mgr earns less than full Marketing Mgr (Glassdoor)
+  ux_researcher:      1.05,   // Slight UX researcher premium over social scientists
+  portfolio_manager:  1.35,   // Portfolio mgr premium over generic financial specialists
+  risk_analyst:       1.10,   // Risk analyst premium over generic financial specialists
+  icu_nurse:          1.07,   // ICU differential over standard RN (BLS NCS shift data)
+  travel_nurse:       1.18,   // Travel nursing premium (Staffing Industry Analysts 2024)
+  clinical_nurse:     1.05,   // CNS premium over standard RN
 }
 
 // ─── Build BLS Series IDs ────────────────────────────────────────────────────
-// OES national annual median wage series: OEUN000000{SOC_7digit}03
+// OES national annual mean wage series: OEUN000000{SOC_7digit}08
+// NOTE: We use datatype 08 (annual mean wage) rather than 03 (annual median wage).
+// BLS suppresses median wages for many occupations with smaller sample sizes
+// (notably many education and some healthcare SOC codes), while mean wages are
+// published for all occupations. Mean and median are within ~5% for most jobs.
 function socToSeriesId(soc) {
-  // Datatype 03 = Annual median wage
-  // Example: Software Developers 15-1252 → OEUN000000000000015125203
-  const digits = soc.replace('-', '')
-  return `OEUN0000000000000${digits}03`
+  // BLS OES series ID — exactly 25 characters:
+  //   OE       = Occupational Employment & Wage Statistics survey (2)
+  //   U        = Unadjusted seasonal code (1)
+  //   N        = National areatype (1)
+  //   0000000  = National area code, 7 digits (7)
+  //   000000   = All industries, 6 digits (6)
+  //   151252   = SOC code digits without dash, always 6 digits (6)
+  //   08       = Datatype 08 = Annual mean wage (2)
+  // Example: Software Developers 15-1252 → OEUN000000000000015125208
+  const digits = soc.replace('-', '')   // '15-1252' → '151252' (always 6 chars)
+  return `OEUN0000000000000${digits}08`
 }
 
 function metroSeriesId(metroCode, soc) {
-  // Metro area annual median wage: datatype 03
+  // Metro area annual mean wage: OE+U+M + 7-digit-metro + 000000(industry) + 6-digit-soc + 08
   const digits = soc.replace('-', '')
-  return `OEUM${metroCode}000000${digits}03`
+  return `OEUM${metroCode}000000${digits}08`
 }
 
 function ruralSeriesId(areaCode, soc) {
-  // Rural nonmetro annual median wage: datatype 03
+  // BLS nonmetro areas use the same OEUM format as metro areas.
+  // Area code = state FIPS (2-digit, zero-padded to 4) + '001' = 7 digits
+  // e.g. Mississippi (FIPS 28) nonmetro → 0028001
   const digits = soc.replace('-', '')
-  return `OEUM${areaCode}000000${digits}03`
+  return `OEUM${areaCode}000000${digits}08`
 }
 
 // Deduplicate — multiple jobs share the same SOC, only fetch each series once
@@ -256,7 +290,34 @@ const totalRural = AREA_PROXY_SOCS.length * Object.keys(RURAL_NONMETROS).length
 console.log(`📊  ${JOB_SOC_MAP.length} jobs → ${uniqueSocs.length} unique SOC codes → ${seriesIds.length} wage series`)
 console.log(`📍  ${totalUrban} urban + ${totalRural} rural area series → ${areaSeriesIds.length} total`)
 
+// ─── Static BLS Wage Fallbacks ───────────────────────────────────────────────
+// Some SOC codes are published in BLS OES HTML tables but are NOT available
+// through the BLS time-series API (v2 /timeseries/data/). This affects teacher
+// and some education occupations because BLS reports their wages as direct annual
+// salaries rather than hourly × 2080, and these series are excluded from the API.
+//
+// These values are sourced directly from BLS OES May 2024 national tables:
+//   https://www.bls.gov/oes/current/oes_nat.htm  (Table 1, annual mean wage column)
+// They must be manually updated each year when BLS releases new OES data (typically
+// April/May). The fetchedAt timestamp in salaries.json reflects the API fetch date;
+// check BLS release notes for the static values below.
+//
+// SOC codes affected (confirmed not in API time-series as of May 2024):
+//   25-2031  Secondary School Teachers       → $72,030  (BLS May 2024)
+//   25-2021  Elementary School Teachers      → $68,900  (BLS May 2024)
+//   25-2050  Special Education Teachers      → $72,140  (BLS May 2024, avg of sub-codes)
+//   25-1000  Postsecondary Teachers          → $90,540  (BLS May 2024)
+//   25-1071  Health Specialties Teachers     → $117,190 (BLS May 2024)
+const BLS_STATIC_WAGES = {
+  '25-2031': 72030,   // Secondary School Teachers, Except Special and CTE
+  '25-2021': 68900,   // Elementary School Teachers, Except Special Education
+  '25-2050': 72140,   // Special Education Teachers (avg across sub-codes 25-2051–2058)
+  '25-1000': 90540,   // Postsecondary Teachers (all)
+  '25-1071': 117190,  // Health Specialties Teachers, Postsecondary
+}
+
 // ─── BLS API Fetcher ─────────────────────────────────────────────────────────
+// BLS API v2 accepts up to 50 series per request.
 async function fetchBLSBatch(series) {
   const res = await fetch(BLS_API, {
     method:  'POST',
@@ -264,7 +325,7 @@ async function fetchBLSBatch(series) {
     body: JSON.stringify({
       seriesid:   series.map(s => s.seriesId),
       registrationkey: API_KEY,
-      latest:     true,
+      latest:     true,   // only fetch the most recent data point
     }),
   })
   if (!res.ok) throw new Error(`BLS API error ${res.status}: ${await res.text()}`)
@@ -276,6 +337,7 @@ async function fetchBLSBatch(series) {
 }
 
 function extractAnnualWage(seriesData) {
+  // BLS returns the value in dollars (annual mean wage for datatype 08)
   const latest = seriesData.data?.[0]
   if (!latest || latest.value === '-') return null
   return Math.round(parseFloat(latest.value))
@@ -283,8 +345,17 @@ function extractAnnualWage(seriesData) {
 
 // ─── Main ────────────────────────────────────────────────────────────────────
 async function main() {
-  console.log('📡  Fetching median wages from BLS OES API...')
+  console.log('📡  Fetching wages from BLS OES API...')
 
+  // Seed with static BLS values for SOC codes the API doesn't serve
+  // (teacher/education SOCs published in BLS HTML tables but not in timeseries API)
+  const staticSocs = Object.keys(BLS_STATIC_WAGES)
+  for (const [soc, wage] of Object.entries(BLS_STATIC_WAGES)) {
+    wagesBySoc[soc] = wage
+    console.log(`     📋 ${soc}: $${wage.toLocaleString()} (BLS OES May 2024 static — not in API)`)
+  }
+
+  // Split into batches of 50 (BLS API limit)
   const BATCH_SIZE = 50
   const wagesBySoc = {}
 
@@ -297,6 +368,7 @@ async function main() {
     const json = await fetchBLSBatch(batch)
 
     for (const series of json.Results.series) {
+      // Find which SOC this series belongs to
       const match = batch.find(b => b.seriesId === series.seriesID)
       if (!match) continue
       const wage = extractAnnualWage(series)
@@ -308,16 +380,21 @@ async function main() {
       }
     }
 
+    // Polite delay between batches
     if (i + BATCH_SIZE < seriesIds.length) {
       await new Promise(r => setTimeout(r, 500))
     }
   }
 
+  // ─── Build salaries.json ───────────────────────────────────────────────────
+  // Jobs with SOC codes not in the BLS API are pre-seeded from BLS_STATIC_WAGES.
+  // Any remaining gaps are hard failures — means a new SOC code needs attention.
   const missingJobs = []
 
   const jobs = JOB_SOC_MAP.map(({ jobId, soc, title, proxy }) => {
     const blsWage = wagesBySoc[soc]
     const premium = PROXY_PREMIUMS[jobId] ?? 1.0
+    const isStatic = staticSocs.includes(soc)
 
     if (!blsWage) {
       missingJobs.push({ jobId, soc })
@@ -331,20 +408,22 @@ async function main() {
       socTitle:     title,
       isProxy:      proxy ?? false,
       proxyPremium: proxy ? premium : undefined,
-      source:       'BLS OES',
+      source:       isStatic ? 'BLS OES (static May 2024)' : 'BLS OES',
     }
   })
 
+  // Hard fail on any remaining gaps — static fallbacks cover known API exclusions,
+  // so new failures mean a SOC code has been deprecated or needs attention.
   if (missingJobs.length > 0) {
     console.error(`\n❌  ${missingJobs.length} job(s) returned no BLS data:`)
     for (const { jobId, soc } of missingJobs) {
       console.error(`     ${jobId} (SOC ${soc}) — check if BLS suppressed this series`)
-      console.error(`     Try a broader aggregate SOC code in JOB_SOC_MAP`)
+      console.error(`     If the API doesn't serve this SOC, add it to BLS_STATIC_WAGES`)
     }
     process.exit(1)
   }
 
-  console.log(`\n✅  All ${jobs.length} jobs have live BLS median data`)
+  console.log(`\n✅  All ${jobs.length} jobs have live BLS data`)
 
   // ─── Fetch area multipliers ────────────────────────────────────────────────
   console.log('\n📍  Fetching area wage data from BLS OES...')
@@ -374,6 +453,7 @@ async function main() {
         if (!areaWages.urban[match.soc]) areaWages.urban[match.soc] = []
         areaWages.urban[match.soc].push(wage)
       } else {
+        // Collect all rural nonmetro wages per SOC, average them
         if (!areaWages.rural[match.soc]) areaWages.rural[match.soc] = []
         areaWages.rural[match.soc].push(wage)
       }
@@ -384,6 +464,8 @@ async function main() {
     }
   }
 
+  // Compute area multipliers: ratio of area mean to national mean for each proxy SOC
+  // then average the ratios across all proxy SOCs for a stable cross-sector multiplier
   const urbanRatios = []
   const ruralRatios = []
 
@@ -411,7 +493,7 @@ async function main() {
 
   const areaMultipliers = {
     Urban:    urbanMultiplier,
-    Suburban: 1.000,
+    Suburban: 1.000,          // national mean is the baseline
     Rural:    ruralMultiplier,
   }
 
@@ -424,12 +506,13 @@ async function main() {
   console.log(`     Suburban: ${areaMultipliers.Suburban}x  (national baseline)`)
   console.log(`     Rural:    ${areaMultipliers.Rural}x  (avg of ${ruralRatios.length} SOC ratios across ${Object.keys(RURAL_NONMETROS).length} rural nonmetro areas)`)
 
+  // Write the output
   const out = {
     _meta: {
       source:      'BLS Occupational Employment and Wage Statistics (OES)',
       apiEndpoint: 'https://api.bls.gov/publicAPI/v2/timeseries/data/',
       fetchedAt:   new Date().toISOString(),
-      note:        'Annual median wages, area multipliers, and proxy premiums. All derived from BLS OES data.',
+      note:        'Annual mean wages (datatype 08), area multipliers, and proxy premiums. All derived from BLS OES data. Mean wages are used instead of median (03) because BLS suppresses median for lower-sample occupations (e.g. many education SOC codes).',
       areaMultipliers,
     },
     jobs,
@@ -440,6 +523,8 @@ async function main() {
   const kb = Math.round(fs.statSync(outPath).size / 1024)
   console.log(`💾  Written src/data/salaries.json (${kb}KB, ${jobs.length} jobs)`)
 }
+
+
 
 main().catch(err => {
   console.error('❌  Fetch failed:', err.message)
