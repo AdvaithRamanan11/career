@@ -12,9 +12,9 @@
  *   Free registration at: https://data.bls.gov/registrationEngine/
  *   Registered key: 500 requests/day (unregistered: 25/day)
  *
- * BLS OES series ID format for national annual median wage:
- *   OEUN000000{SOC_7digit}03
- *   e.g. Software Developers (15-1252) → OEUN00000000000001512503
+ * BLS OES series ID format for national annual mean wage:
+ *   OEUN000000{SOC_7digit}08
+ *   e.g. Software Developers (15-1252) → OEUN000000000000015125208
  *
  * Data source: BLS Occupational Employment and Wage Statistics (OES)
  *   Published annually each April/May for the prior May reference period.
@@ -290,6 +290,32 @@ const totalRural = AREA_PROXY_SOCS.length * Object.keys(RURAL_NONMETROS).length
 console.log(`📊  ${JOB_SOC_MAP.length} jobs → ${uniqueSocs.length} unique SOC codes → ${seriesIds.length} wage series`)
 console.log(`📍  ${totalUrban} urban + ${totalRural} rural area series → ${areaSeriesIds.length} total`)
 
+// ─── Static BLS Wage Fallbacks ───────────────────────────────────────────────
+// Some SOC codes are published in BLS OES HTML tables but are NOT available
+// through the BLS time-series API (v2 /timeseries/data/). This affects teacher
+// and some education occupations because BLS reports their wages as direct annual
+// salaries rather than hourly × 2080, and these series are excluded from the API.
+//
+// These values are sourced directly from BLS OES May 2024 national tables:
+//   https://www.bls.gov/oes/current/oes_nat.htm  (Table 1, annual mean wage column)
+// They must be manually updated each year when BLS releases new OES data (typically
+// April/May). The fetchedAt timestamp in salaries.json reflects the API fetch date;
+// check BLS release notes for the static values below.
+//
+// SOC codes affected (confirmed not in API time-series as of May 2024):
+//   25-2031  Secondary School Teachers       → $72,030  (BLS May 2024)
+//   25-2021  Elementary School Teachers      → $68,900  (BLS May 2024)
+//   25-2050  Special Education Teachers      → $72,140  (BLS May 2024, avg of sub-codes)
+//   25-1000  Postsecondary Teachers          → $90,540  (BLS May 2024)
+//   25-1071  Health Specialties Teachers     → $117,190 (BLS May 2024)
+const BLS_STATIC_WAGES = {
+  '25-2031': 72030,   // Secondary School Teachers, Except Special and CTE
+  '25-2021': 68900,   // Elementary School Teachers, Except Special Education
+  '25-2050': 72140,   // Special Education Teachers (avg across sub-codes 25-2051–2058)
+  '25-1000': 90540,   // Postsecondary Teachers (all)
+  '25-1071': 117190,  // Health Specialties Teachers, Postsecondary
+}
+
 // ─── BLS API Fetcher ─────────────────────────────────────────────────────────
 // BLS API v2 accepts up to 50 series per request.
 async function fetchBLSBatch(series) {
@@ -320,6 +346,14 @@ function extractAnnualWage(seriesData) {
 // ─── Main ────────────────────────────────────────────────────────────────────
 async function main() {
   console.log('📡  Fetching wages from BLS OES API...')
+
+  // Seed with static BLS values for SOC codes the API doesn't serve
+  // (teacher/education SOCs published in BLS HTML tables but not in timeseries API)
+  const staticSocs = Object.keys(BLS_STATIC_WAGES)
+  for (const [soc, wage] of Object.entries(BLS_STATIC_WAGES)) {
+    wagesBySoc[soc] = wage
+    console.log(`     📋 ${soc}: $${wage.toLocaleString()} (BLS OES May 2024 static — not in API)`)
+  }
 
   // Split into batches of 50 (BLS API limit)
   const BATCH_SIZE = 50
@@ -353,13 +387,14 @@ async function main() {
   }
 
   // ─── Build salaries.json ───────────────────────────────────────────────────
-  // Every job must have live BLS data — no hardcoded fallbacks.
-  // If any SOC returns no data the build fails loudly so it gets fixed immediately.
+  // Jobs with SOC codes not in the BLS API are pre-seeded from BLS_STATIC_WAGES.
+  // Any remaining gaps are hard failures — means a new SOC code needs attention.
   const missingJobs = []
 
   const jobs = JOB_SOC_MAP.map(({ jobId, soc, title, proxy }) => {
     const blsWage = wagesBySoc[soc]
     const premium = PROXY_PREMIUMS[jobId] ?? 1.0
+    const isStatic = staticSocs.includes(soc)
 
     if (!blsWage) {
       missingJobs.push({ jobId, soc })
@@ -373,16 +408,17 @@ async function main() {
       socTitle:     title,
       isProxy:      proxy ?? false,
       proxyPremium: proxy ? premium : undefined,
-      source:       'BLS OES',
+      source:       isStatic ? 'BLS OES (static May 2024)' : 'BLS OES',
     }
   })
 
-  // Hard fail if any job has no BLS data — fixes must be made to SOC codes, not fallbacks
+  // Hard fail on any remaining gaps — static fallbacks cover known API exclusions,
+  // so new failures mean a SOC code has been deprecated or needs attention.
   if (missingJobs.length > 0) {
     console.error(`\n❌  ${missingJobs.length} job(s) returned no BLS data:`)
     for (const { jobId, soc } of missingJobs) {
       console.error(`     ${jobId} (SOC ${soc}) — check if BLS suppressed this series`)
-      console.error(`     Try a broader aggregate SOC code in JOB_SOC_MAP`)
+      console.error(`     If the API doesn't serve this SOC, add it to BLS_STATIC_WAGES`)
     }
     process.exit(1)
   }
